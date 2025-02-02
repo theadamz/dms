@@ -115,12 +115,18 @@
                     <form id="formInput" name="formInput" class="form">
                         <div class="row">
                             <div class="col-md-12">
-                                <x-inputs.lov label="Category" :is-required="true" hidden-element-name="category"
-                                              element-name="category_name" :url="route('lov.basics.categories', ['is_active' => true])" />
+                                <div class="form-group fv-row">
+                                    <label class="form-label font-weight-normal mb-1">Category <span class="text-danger">*</span></label>
+                                    <select class="form-control font-weight-normal form-select2" id="category" name="category" data-allow-clear="false">
+                                        <option value=""></option>
+                                        @foreach ($categories as $category)
+                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
                             <div class="col-md-12">
-                                <x-inputs.textbox label="Name" :is-required="true" element-name="name"
-                                                  :max-length="50" />
+                                <x-inputs.textbox label="Name" :is-required="true" element-name="name" :max-length="50" />
                             </div>
                             <div class="col-md-12">
                                 <x-inputs.checkbox label="Active" element-name="is_active" value="true" />

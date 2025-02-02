@@ -4,18 +4,29 @@
         @endif
     </label>
     <div class="input-group fv-row">
-        <input type="text" class="d-none" id="{{ $hiddenElementId }}" name="{{ $hiddenElementName }}"
-            value="{{ $hiddenElementValue }}" readonly />
-        <input type="text" placeholder="{{ $placeholder }}" id="{{ $elementId }}" name="{{ $elementName }}"
-            value="{{ $elementValue }}" class="form-control rounded-left font-weight-normal bg-white" autocomplete="off"
-            readonly />
+        <input
+               type="text"
+               class="d-none"
+               id="{{ $hiddenElementId }}"
+               name="{{ $hiddenElementName }}"
+               value="{{ $hiddenElementValue }}" readonly />
+        <input
+               type="text"
+               placeholder="{{ $placeholder }}"
+               id="{{ $elementId }}"
+               name="{{ $elementName }}"
+               value="{{ $elementValue }}"
+               class="form-control rounded-left font-weight-normal bg-white"
+               autocomplete="off"
+               readonly />
         <div class="input-group-append rounded-right">
-            <button type="button"
-                class="btn btn-outline-secondary input-group-text @if (!$clearButtonShow) rounded-right @endif"
-                id="{{ $searchButtonName }}" name="{{ $searchButtonName }}"><i class="fas fa-search"></i></button>
+            <button type="button" class="btn btn-outline-secondary input-group-text @if (!$clearButtonShow) rounded-right @endif" id="{{ $searchButtonName }}" name="{{ $searchButtonName }}">
+                <i class="fas fa-search"></i>
+            </button>
             @if ($clearButtonShow)
-                <button type="button" class="btn btn-outline-secondary input-group-text" id="{{ $clearButtonName }}"
-                    name="{{ $clearButtonName }}"><i class="fas fa-times"></i></button>
+                <button type="button" class="btn btn-outline-secondary input-group-text" id="{{ $clearButtonName }}" name="{{ $clearButtonName }}">
+                    <i class="fas fa-times"></i>
+                </button>
             @endif
         </div>
     </div>
@@ -51,18 +62,13 @@
 
                     $('#_modal_lov').on('hide.bs.modal', function() {
                         if ($resultFromLOV.result) {
-                            if ({{ $hiddenElementName }} == $resultFromLOV.data
-                                .{{ $hiddenElementColumnName }}) return;
-                            {{ $hiddenElementName }} = $resultFromLOV.data
-                                .{{ $hiddenElementColumnName }};
+                            if ({{ $hiddenElementName }} == $resultFromLOV.data.{{ $hiddenElementColumnName }}) return;
+                            {{ $hiddenElementName }} = $resultFromLOV.data.{{ $hiddenElementColumnName }};
 
-                            $(`#{{ $hiddenElementId }}`).val($resultFromLOV.data
-                                .{{ $hiddenElementColumnName }});
-                            $(`#{{ $elementId }}`).val($resultFromLOV.data
-                                .{{ $elementColumnName }});
+                            $(`#{{ $hiddenElementId }}`).val($resultFromLOV.data.{{ $hiddenElementColumnName }});
+                            $(`#{{ $elementId }}`).val($resultFromLOV.data.{{ $elementColumnName }});
                             @if (!empty($columnNameForDescription))
-                                $(`#columnNameForDescription`).text($resultFromLOV.data
-                                    .{{ $columnNameForDescription }});
+                                $(`#columnNameForDescription`).text($resultFromLOV.data.{{ $columnNameForDescription }});
                             @endif
                         }
                     });

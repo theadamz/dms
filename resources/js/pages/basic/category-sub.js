@@ -261,8 +261,7 @@ async function editData(id = null) {
     const data = response.data.data;
 
     // fill input
-    $('#category').val(data.category_id);
-    $('#category_name').val(data.category.name);
+    $('#category option[value="' + data.category_id + '"]').prop('selected', true).change();
     $('#name').val(data.name);
     $('#is_active').prop('checked', boolValue(data.is_active))
 
@@ -421,6 +420,7 @@ function formInputClear() {
     _data2Send = null;
     _formValidation.resetForm();
     $('#formInput')[0].reset();
+    $('#category').prop('selectedIndex', 0).trigger('change');
     $('#is_active').prop('checked', true);
 }
 

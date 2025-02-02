@@ -38,7 +38,10 @@ class CategorySubController extends Controller
         // template name
         $templateName = $this->templateName;
 
-        return view('basic.category-sub')->with(compact('templateName'));
+        // get categories
+        $categories = Category::where('is_active', true)->get(['id', 'name']);
+
+        return view('basic.category-sub')->with(compact('templateName', 'categories'));
     }
 
     public function datatable(Request $request): JsonResponse
@@ -225,7 +228,7 @@ class CategorySubController extends Controller
         ])->validated();
 
         // get data
-        $data = CategorySub::where('id', $validated['id'])->select(['category_id', 'name', 'is_active'])->with(['category:id,name'])->first();
+        $data = CategorySub::where('id', $validated['id'])->select(['category_id', 'name', 'is_active'])->first();
 
         // if data empty
         if (empty($data)) {

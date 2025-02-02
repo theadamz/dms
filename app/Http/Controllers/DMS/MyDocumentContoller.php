@@ -116,7 +116,7 @@ class MyDocumentContoller extends Controller
         // approval type
         $workflowTypes = WorkflowType::cases();
 
-        // category
+        // get categories
         $categories = Category::where('is_active', true)->get(['id', 'name']);
 
         return view('dms.my-document.create')->with(compact('workflowTypes', 'categories'));

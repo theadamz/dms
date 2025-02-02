@@ -9,7 +9,6 @@
         "intervention/image": "^3.11",
         "jenssegers/agent": "^2.6",
         "laravel/framework": "^11.41",
-        "laravel/octane": "^2.6",
         "laravel/tinker": "^2.10",
         "milon/barcode": "^11.0",
         "openspout/openspout": "^4.28",

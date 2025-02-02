@@ -44,3 +44,4 @@ Homestead.json
 /public/contents/temp
 # js result from build (pnpm build)
 /public/assets/pages
+Caddyfile

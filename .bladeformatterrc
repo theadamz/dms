@@ -1,0 +1,6 @@
+{
+    "wrapAttributes": "preserve-aligned",
+    "sortHtmlAttributes": "none",
+    "noMultipleEmptyLines": true,
+    "wrapLineLength": 1920
+}

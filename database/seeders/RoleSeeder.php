@@ -15,28 +15,28 @@ class RoleSeeder extends Seeder
     {
         Role::create([
             'id' => '00000000-0000-0000-0000-000000000000',
-            'code' => 'DEV',
+            'code' => 'dev',
             'name' => 'Developer',
             'def_path' => '/configs/users'
         ]);
 
         Role::create([
             'id' => '00000000-0000-0000-0000-000000000001',
-            'code' => 'ADMSTR',
+            'code' => 'administrator',
             'name' => 'Administrator',
             'def_path' => '/configs/users'
         ]);
 
         Role::create([
-            'code' => 'ADMIN',
-            'name' => 'Admin',
-            'def_path' => '/basics/categories'
+            'code' => 'manager',
+            'name' => 'Manager',
+            'def_path' => '/my-approvals/waiting'
         ]);
 
         Role::create([
-            'code' => 'USR',
-            'name' => 'User',
-            'def_path' => '/basics/categories'
+            'code' => 'staff',
+            'name' => 'Staff',
+            'def_path' => '/my-documents/list'
         ]);
     }
 }

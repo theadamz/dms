@@ -82,9 +82,12 @@ class AuthenticationController extends Controller
         Session::put('name', $user->name);
         Session::put('email', $user->email);
         Session::put('role_id', $user->role_id);
+        Session::put('role_name', $user->role->name);
+        Session::put('department_id', $user->department_id);
+        Session::put('department_name', $user->department->name);
         Session::put('def_path', $role->def_path);
         Session::put('timezone', $user->timezone);
-        Session::put('picture', !empty($user->picture) ? asset('/contents/' . $user->picture) : url('/assets/images/_photo_profile_blank.png'));
+        Session::put('picture', !empty($user->picture) ? asset('/storage/profile/' . $user->picture) : url('/assets/images/_photo_profile_blank.png'));
 
         // create sign in history
         $this->createSignInHistory();

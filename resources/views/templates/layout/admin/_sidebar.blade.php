@@ -11,7 +11,7 @@
             <img src="{{ session('picture') }}" class="img-circle elevation-2" alt="{{ session('name') }}">
         </div>
         <div class="info pt-1">
-            <a href="{{ url('profile') }}" class="d-block text-light">{{ session('name') }}</a>
+            <a href="{{ route('change-profile') }}" class="d-block text-light">{{ session('name') }}</a>
         </div>
     </div>
 

@@ -85,6 +85,8 @@ function getData() {
             $('#email').val(data.email);
             $('#name').val(data.name);
             $('#timezone option[value="' + data.timezone + '"]').prop('selected', true).change();
+            $('#department_name').val(data.department.name);
+            $('#role_name').val(data.role.name);
             $('#last_sign_in').val(dateTimeFormat(data.last_sign_in));
             $('#last_update').val(dateTimeFormat(data.updated_at));
             $('#last_change_password').val(data.last_change_password_at ? dateTimeFormat(data.last_change_password_at) : 'Never');

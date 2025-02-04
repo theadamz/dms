@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Config\Department;
 use App\Models\Config\Role;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -29,6 +30,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'password',
         'role_id',
+        'department_id',
         'timezone',
         'last_change_password_at',
         'last_login_at',
@@ -74,5 +76,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class);
+    }
+
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
     }
 }

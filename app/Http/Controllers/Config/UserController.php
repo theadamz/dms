@@ -211,7 +211,7 @@ class UserController extends Controller
 
         // refactor
         if (!empty($data->picture)) {
-            $data->picture = asset('/contents/' . $data->picture);
+            $data->picture = asset('/storage/profile/' . $data->picture);
         }
 
         return response()->json(['message' => Response::$statusTexts[Response::HTTP_OK], 'data' => $data])->setStatusCode(Response::HTTP_OK);

@@ -55,6 +55,18 @@
                                 </div>
                             </div>
                             <div class="form-group row">
+                                <label for="last_sign_in" class="font-weight-normal mb-1 col-form-label col-sm-3">Department</label>
+                                <div class="fv-row col-sm-9">
+                                    <input type="text" placeholder="Department" id="department_name" name="department_name" autocomplete="off" value="" class="form-control-plaintext" disabled>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="last_sign_in" class="font-weight-normal mb-1 col-form-label col-sm-3">Role/Access</label>
+                                <div class="fv-row col-sm-9">
+                                    <input type="text" placeholder="Role/Access" id="role_name" name="role_name" autocomplete="off" value="" class="form-control-plaintext" disabled>
+                                </div>
+                            </div>
+                            <div class="form-group row">
                                 <label for="last_sign_in" class="font-weight-normal mb-1 col-form-label col-sm-3">Last Sign In</label>
                                 <div class="fv-row col-sm-9">
                                     <input type="text" placeholder="Last Sign In" id="last_sign_in" name="last_sign_in" autocomplete="off" value="" class="form-control-plaintext" disabled>

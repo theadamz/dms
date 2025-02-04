@@ -2,6 +2,17 @@
 
 use Illuminate\Support\Facades\Route;
 
+// config > department
+Route::middleware(['can:config-department', 'access:config-department'])->group(function () {
+    Route::get('/departments', [\App\Http\Controllers\Config\DepartmentController::class, 'index'])->can('config-department');
+    Route::post('/departments', [\App\Http\Controllers\Config\DepartmentController::class, 'store'])->can('config-department-create');
+    Route::get('/departments/{id}', [\App\Http\Controllers\Config\DepartmentController::class, 'show'])->can('config-department-read');
+    Route::put('/departments/{id}', [\App\Http\Controllers\Config\DepartmentController::class, 'update'])->can('config-department-edit');
+    Route::delete('/departments', [\App\Http\Controllers\Config\DepartmentController::class, 'destroy'])->can('config-department-delete');
+    Route::post('/departments/imports', [\App\Http\Controllers\Config\DepartmentController::class, 'storeImport'])->can('config-department-import');
+    Route::post('/departments/exports', [\App\Http\Controllers\Config\DepartmentController::class, 'export'])->can('config-department-export');
+});
+
 // config > role
 Route::middleware(['can:config-role', 'access:config-role'])->group(function () {
     Route::get('/roles', [\App\Http\Controllers\Config\RoleController::class, 'index'])->can('config-role');

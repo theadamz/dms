@@ -33,15 +33,17 @@ Homestead.json
 /storage/*.key
 /storage/vite.hot
 
-# ignore all files and folder in storage/app/contents except templates
+# ignore all files and folder inside storage except templates
+!/storage/app/public/templates/
+/storage/app/public/profile/*
 /storage/app/contents/*
-!/storage/app/contents/templates/
-# js result from build (pnpm build)
-/storage/app/assets/pages
-# this part is created from symlink (php artisan storage:link)
-/public/contents
-/public/contents/thumbs
-/public/contents/temp
+/storage/app/temp/*
+
 # js result from build (pnpm build)
 /public/assets/pages
+
+# this part is created from symlink (php artisan storage:link)
+/public/storage
+
+# Caddyfile for frankenphp static build
 Caddyfile

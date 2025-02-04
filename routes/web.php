@@ -88,15 +88,14 @@ Route::prefix("documents")->middleware(['auth'])->group(fn() => require_once __D
 // download template
 Route::get('/templates/{template_name}', function (string $template_name) {
     // variables
-    $fileName = $template_name;
-    $fileWithPath = config('setting.other.path_to_template') . '/' . $fileName;
+    $fileWithPath = config('setting.other.path_to_template') . '/' . $template_name;
 
     // check if file exist
-    if (!Storage::exists($fileWithPath)) {
+    if (!Storage::disk('public')->exists($fileWithPath)) {
         abort(Response::HTTP_NOT_FOUND);
     }
 
-    return Storage::download(config('setting.other.path_to_template') . '/' . $fileName, $fileName);
+    return Storage::disk('public')->download($fileWithPath, $template_name);
 })->name('template.download');
 
 // download file temp like exported data
@@ -108,9 +107,9 @@ Route::get('/download-temp/{fileNameEncoded}', function (string $fileNameEncoded
     $fileWithPath = config('setting.other.path_to_temp') . '/' . $fileName;
 
     // check if file exist
-    if (!Storage::exists($fileWithPath)) {
+    if (!Storage::disk('local')->exists($fileWithPath)) {
         abort(Response::HTTP_NOT_FOUND);
     }
 
-    return response()->download(config('setting.other.path_to_temp') . '/' . $fileName, $fileName)->deleteFileAfterSend();
+    return response()->download(Storage::disk('local')->path($fileWithPath), $fileName)->deleteFileAfterSend();
 })->name('download-temp-file');

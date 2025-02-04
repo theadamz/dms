@@ -7,6 +7,7 @@ Route::get('/sign-in-history', [\App\Http\Controllers\Account\ProfileController:
 // config
 Route::prefix('/configs')->group(function () {
     // core
+    Route::get('/departments', [\App\Http\Controllers\Config\DepartmentController::class, 'datatable'])->name('dt.departments.roles');
     Route::get('/roles', [\App\Http\Controllers\Config\RoleController::class, 'datatable'])->name('dt.configs.roles');
     Route::get('/users', [\App\Http\Controllers\Config\UserController::class, 'datatable'])->name('dt.configs.users');
 });

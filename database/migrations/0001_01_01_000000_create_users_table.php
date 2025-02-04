@@ -17,6 +17,7 @@ return new class extends Migration {
             $table->string('name');
             $table->string('password');
             $table->uuid('role_id')->index();
+            $table->uuid('department_id')->index();
             $table->string('timezone', 50)->default(config('setting.local.timezone'));
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamp('last_change_password_at')->nullable();
@@ -30,6 +31,7 @@ return new class extends Migration {
 
             // FK
             $table->foreign('role_id')->references('id')->on('roles')->restrictOnDelete()->cascadeOnUpdate();
+            $table->foreign('department_id')->references('id')->on('departments')->restrictOnDelete()->cascadeOnUpdate();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

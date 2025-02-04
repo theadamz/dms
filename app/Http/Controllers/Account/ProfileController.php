@@ -229,7 +229,7 @@ class ProfileController extends Controller
         Session::put('name', $user->name);
         Session::put('email', $user->email);
         Session::put('timezone', $user->timezone);
-        Session::put('picture', !empty($user->picture) ? asset('/contents/' . $user->picture) : url('/assets/images/_photo_profile_blank.png'));
+        Session::put('picture', !empty($user->picture) ? asset('/storage/profile/' . $user->picture) : url('/assets/images/_photo_profile_blank.png'));
 
         return response()->json(["message" => "Profile has been updated."])->setStatusCode(Response::HTTP_OK);
     }
@@ -237,10 +237,10 @@ class ProfileController extends Controller
     public function profileInfo(): JsonResponse
     {
         // get user
-        $user = User::where('id', Auth::id())->with(['role:id,name'])->first(['username', 'email', 'name', 'timezone', 'last_login_at', 'updated_at', 'last_change_password_at', 'picture']);
+        $user = User::where('id', Auth::id())->with(['role:id,name', 'department:id,name'])->first(['username', 'email', 'name', 'timezone', 'role_id', 'department_id', 'last_login_at', 'updated_at', 'last_change_password_at', 'picture']);
 
         if (!empty($user->picture)) {
-            $user->picture = asset('/contents/' . $user->picture);
+            $user->picture = asset('/storage/profile/' . $user->picture);
         }
 
         return response()->json(["message" => Response::$statusTexts[Response::HTTP_OK], 'data' => $user])->setStatusCode(Response::HTTP_OK);

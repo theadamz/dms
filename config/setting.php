@@ -45,7 +45,7 @@ return [
         'file_doc_attachment_allowed' => ['pdf', 'doc', 'docx', 'xlsx', 'ppt', 'pptx', 'rtf', 'csv', 'txt'],
         'file_img_allowed' => ['png', 'jpg', 'jpeg', 'bmp'],
         'path_to_upload' => 'contents',
-        'path_to_template' => 'assets/templates',
+        'path_to_template' => 'templates',
         'path_to_temp' => 'contents/temp',
         'cache_time' => 60 * 5, // default cache time : 5 min
     ],

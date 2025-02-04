@@ -5079,7 +5079,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function lock($name, $seconds = 0, $owner = null)
         {
-            /** @var \Illuminate\Cache\MemcachedStore $instance */
+            /** @var \Illuminate\Cache\DatabaseStore $instance */
             return $instance->lock($name, $seconds, $owner);
         }
 
@@ -5093,8 +5093,21 @@ namespace Illuminate\Support\Facades {
          */
         public static function restoreLock($name, $owner)
         {
-            /** @var \Illuminate\Cache\MemcachedStore $instance */
+            /** @var \Illuminate\Cache\DatabaseStore $instance */
             return $instance->restoreLock($name, $owner);
+        }
+
+        /**
+         * Remove an item from the cache if it is expired.
+         *
+         * @param string $key
+         * @return bool 
+         * @static 
+         */
+        public static function forgetIfExpired($key)
+        {
+            /** @var \Illuminate\Cache\DatabaseStore $instance */
+            return $instance->forgetIfExpired($key);
         }
 
         /**
@@ -5105,20 +5118,33 @@ namespace Illuminate\Support\Facades {
          */
         public static function flush()
         {
-            /** @var \Illuminate\Cache\MemcachedStore $instance */
+            /** @var \Illuminate\Cache\DatabaseStore $instance */
             return $instance->flush();
         }
 
         /**
-         * Get the underlying Memcached connection.
+         * Get the underlying database connection.
          *
-         * @return \Memcached 
+         * @return \Illuminate\Database\PostgresConnection 
          * @static 
          */
-        public static function getMemcached()
+        public static function getConnection()
         {
-            /** @var \Illuminate\Cache\MemcachedStore $instance */
-            return $instance->getMemcached();
+            /** @var \Illuminate\Cache\DatabaseStore $instance */
+            return $instance->getConnection();
+        }
+
+        /**
+         * Specify the name of the connection that should be used to manage locks.
+         *
+         * @param \Illuminate\Database\ConnectionInterface $connection
+         * @return \Illuminate\Cache\DatabaseStore 
+         * @static 
+         */
+        public static function setLockConnection($connection)
+        {
+            /** @var \Illuminate\Cache\DatabaseStore $instance */
+            return $instance->setLockConnection($connection);
         }
 
         /**
@@ -5129,7 +5155,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function getPrefix()
         {
-            /** @var \Illuminate\Cache\MemcachedStore $instance */
+            /** @var \Illuminate\Cache\DatabaseStore $instance */
             return $instance->getPrefix();
         }
 
@@ -5142,7 +5168,7 @@ namespace Illuminate\Support\Facades {
          */
         public static function setPrefix($prefix)
         {
-            /** @var \Illuminate\Cache\MemcachedStore $instance */
+            /** @var \Illuminate\Cache\DatabaseStore $instance */
             $instance->setPrefix($prefix);
         }
 

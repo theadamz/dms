@@ -112,6 +112,7 @@ export const select2TemplateOptions = {
         return `<div class="d-flex flex-column">
                     <span class="font-weight-bold">${item.name}</span>
                     <span class="font-weight-light">${item.email}</span>
+                    <span class="font-weight-light">${item.department.name}</span>
                 </div>`
     },
     userSelection: (item) => {

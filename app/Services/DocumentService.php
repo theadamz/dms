@@ -85,17 +85,22 @@ class DocumentService
     public function store(
         DateTime $docDate,
         ?DateTime $dueDate = null,
-        string $categorySubId,
         string $ownerId,
+        string $categorySubId,
+        string $departmentId,
+        ?string $refDocId = null,
         ?string $notes = null,
         WorkflowType $approvalWorkflowType,
-        bool $isLocked,
         WorkflowType $reviewWorkflowType,
-        bool $reqReview,
+        bool $isReviewRequired,
         WorkflowType $acknowledgementWorkflowType,
-        bool $reqAcknowledgement,
+        bool $isAcknowledgementRequired,
+        bool $isLocked,
+        bool $isPublic,
         array $files,
         array $approvalUsers,
+        ?array $reviewUsers = null,
+        ?array $acknowledgementUsers = null,
     ): DocumentData {
         try {
             // handle files

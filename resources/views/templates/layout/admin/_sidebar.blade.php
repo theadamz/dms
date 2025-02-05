@@ -1,8 +1,9 @@
 <!-- Main Sidebar Container -->
 <aside class="main-sidebar main-sidebar-custom sidebar-dark-primary elevation-0 sidebar-no-expand">
     <!-- Brand Logo -->
-    <a href="{{ url('/') }}" class="brand-link d-flex justify-content-center align-items-center border-right">
-        <span class="brand-text font-weight-bold">{{ config('setting.general.web_name_short') }}</span>
+    <a href="{{ url('/') }}" class="brand-link text-center pb-2 text-truncate">
+        <img src="{{ asset('assets/images/favicon.png') }}" alt="{{ config('setting.general.web_name') }}" class="brand-image img-circle elevation-1" style="opacity: .8">
+        <span class="brand-text font-weight-bold" title="{{ config('setting.general.web_name') }}">{{ config('setting.general.web_name') }}</span>
     </a>
 
     <!-- Sidebar user (optional) -->

@@ -56,8 +56,9 @@ function initDataTable() {
             "url": `${_baseURL}/dt/configs/users`,
             "type": "GET",
             "data": function (d) {
-                d.is_active = $('#filter_is_active').val();
+                d.department = $('#filter_department').val();
                 d.role = $('#filter_role').val();
+                d.is_active = $('#filter_is_active').val();
             },
         },
         "columns": [{
@@ -74,12 +75,19 @@ function initDataTable() {
             },
             {
                 "data": "username",
+                "name": "u.username"
             },
             {
                 "data": "email",
+                "name": "u.email"
             },
             {
                 "data": "name",
+                "name": "u.name"
+            },
+            {
+                "data": "department_name",
+                "name": "d.name"
             },
             {
                 "data": "role_name",
@@ -87,6 +95,7 @@ function initDataTable() {
             },
             {
                 "data": "timezone",
+                "name": "u.name"
             },
             {
                 "data": "is_active",
@@ -142,6 +151,9 @@ function initFormValidation() {
             name: {
                 required: true,
             },
+            department: {
+                required: true,
+            },
             role: {
                 required: true,
             },
@@ -177,6 +189,8 @@ function initOtherElements() {
             noPicture = true;
         }
     });
+
+    document.getElementById('showPassword').addEventListener('click', (e) => handleShowPassword('showPassword'));
 }
 
 function initActions() {
@@ -299,6 +313,7 @@ async function editData(id = null) {
         $('#picturePreview').attr('src', data.picture);
         noPicture = false;
     }
+    $('#department option[value="' + data.department_id + '"]').prop('selected', true).change();
     $('#role option[value="' + data.role_id + '"]').prop('selected', true).change();
     $('#timezone option[value="' + data.timezone + '"]').prop('selected', true).change();
     $('#is_active').prop('checked', boolValue(data.is_active))
@@ -364,6 +379,20 @@ async function deleteData() {
     showBlockUIElement('#list_datatable', false);
 }
 
+function handleShowPassword(elName) {
+    const element = document.getElementById(elName);
+    const elTarget = document.getElementById(element.getAttribute("for"));
+    if (elTarget.type === 'password') {
+        elTarget.type = 'text';
+        element.querySelector(".fa-eye-slash").classList.remove("d-none");
+        element.querySelector(".fa-eye").classList.add("d-none");
+    } else {
+        elTarget.type = 'password';
+        element.querySelector(".fa-eye").classList.remove("d-none");
+        element.querySelector(".fa-eye-slash").classList.add("d-none");
+    }
+}
+
 function reloadDataTable(resetPaging = true) {
     _dataTableResetFilter = false;
     _dataTable.ajax.reload(null, resetPaging);
@@ -374,6 +403,7 @@ function formInputClear() {
     _data2Send = null;
     _formValidation.resetForm();
     $('#formInput')[0].reset();
+    $('#department option[value=""]').prop('selected', true).change();
     $('#role option[value=""]').prop('selected', true).change();
     $('#timezone option[value=""]').prop('selected', true).change();
     $('#is_active').prop('checked', true);

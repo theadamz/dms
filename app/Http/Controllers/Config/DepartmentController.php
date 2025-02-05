@@ -98,8 +98,7 @@ class DepartmentController extends Controller
             $file->storeAs(config('setting.other.path_to_temp'), $file->hashName());
 
             // construct the full path for reading the file
-            $filePath = Storage::disk('local')->path(config('setting.other.path_to_temp') . '/' . $file->hashName());
-            dd($filePath);
+            $filePath = config('setting.other.path_to_temp') . '/' . $file->hashName();
 
             // Check if the file exists
             if (!Storage::disk('local')->exists($filePath)) {
@@ -109,11 +108,10 @@ class DepartmentController extends Controller
             }
 
             // Read the Excel file
-            $rows = $openSpout->readFileExcel(filePath: $filePath, sheetName: "DATA", useFirstRowAsKeyName: true);
-            dd($rows);
+            $rows = $openSpout->readFileExcel(filePath: Storage::disk('local')->path($filePath), sheetName: "DATA", useFirstRowAsKeyName: true);
 
             // Delete the file after reading
-            Storage::disk('local')->delete(config('setting.other.path_to_temp') . '/' . $file->hashName());
+            Storage::disk('local')->delete($filePath);
 
             // If rows are empty
             if (empty($rows)) {

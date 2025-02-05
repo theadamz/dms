@@ -13,9 +13,13 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        for ($i = 0; $i < 5; $i++) {
+        Category::truncate();
+
+        $categories = ['Dokumen Legal', 'Dokumen Keuangan', 'Dokumen Sumber Daya Manusia', 'Dokumen Operasional', 'Dokumen Pemasaran dan Penjualan'];
+
+        foreach ($categories as $category) {
             Category::create([
-                'name' => fake()->word(),
+                'name' => $category,
             ]);
         }
     }

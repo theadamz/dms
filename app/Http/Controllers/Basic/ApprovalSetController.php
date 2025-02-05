@@ -285,7 +285,9 @@ class ApprovalSetController extends Controller
                     $query->orWhere('name', 'ilike', "%{$request->keyword}%");
                 })->orderBy('id');
         } else {
-            $queries = DB::table("approval_set_users", "asu")->leftJoin("users AS u", "u.id", "=", "asu.user_id")
+            $queries = DB::table("approval_set_users", "asu")
+                ->leftJoin("users AS u", "u.id", "=", "asu.user_id")
+                ->leftJoin("departments AS d", "d.id", "=", "u.department_id")
                 ->where('asu.approval_set_id', $approvalSetId)
                 ->where(function ($query) use ($request) {
                     $query->orWhere('u.name', 'ilike', "%{$request->keyword}%")->orWhere('u.email', 'ilike', "%{$request->keyword}%")->orWhere('u.username', 'ilike', "%{$request->keyword}%");

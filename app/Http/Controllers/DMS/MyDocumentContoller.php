@@ -103,7 +103,6 @@ class MyDocumentContoller extends Controller
     {
         // vendor js
         GeneralHelper::addAdditionalVendorJS([
-            url('assets/vendor/plugins/tinymce/tinymce.min.js'),
             url('assets/vendor/plugins/sortable/Sortable.min.js'),
             url('assets/vendor/plugins/sortable/jquery-sortable.min.js'),
         ]);

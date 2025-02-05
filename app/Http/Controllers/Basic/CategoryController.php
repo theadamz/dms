@@ -105,20 +105,20 @@ class CategoryController extends Controller
             $file->storeAs(config('setting.other.path_to_temp'), $file->hashName());
 
             // construct the full path for reading the file
-            $filePath = storage_path('app/' . config('setting.other.path_to_temp') . '/' . $file->hashName());
+            $filePath = config('setting.other.path_to_temp') . '/' . $file->hashName();
 
             // Check if the file exists
-            if (!file_exists($filePath)) {
+            if (!Storage::disk('local')->exists($filePath)) {
                 throw new HttpResponseException(response([
                     "message" => 'Uploaded file does not exist at the expected path.',
                 ], Response::HTTP_NOT_FOUND));
             }
 
             // Read the Excel file
-            $rows = $openSpout->readFileExcel(filePath: $filePath, sheetName: "DATA", useFirstRowAsKeyName: true);
+            $rows = $openSpout->readFileExcel(filePath: Storage::disk('local')->path($filePath), sheetName: "DATA", useFirstRowAsKeyName: true);
 
             // Delete the file after reading
-            Storage::delete(config('setting.other.path_to_temp') . '/' . $file->hashName());
+            Storage::disk('local')->delete($filePath);
 
             // If rows are empty
             if (empty($rows)) {
@@ -328,7 +328,7 @@ class CategoryController extends Controller
 
         // variables
         $fileName = now()->format('YmdHis') . "_basics_categories.xlsx";
-        $url = route('download-temp-file', ['fileNameEncoded' => base64_encode($fileName)]);
+        $fileNameWithPath = config('setting.other.path_to_temp') . '/' . $fileName;
 
         // columns header
         $columns = [
@@ -338,11 +338,14 @@ class CategoryController extends Controller
         ];
 
         $openSpout->generateXlsx(
-            filePath: config('setting.other.path_to_temp') . '/' . $fileName,
+            filePath: Storage::disk('local')->path($fileNameWithPath),
             columns: $columns,
             records: $records,
             useNumberFirstRow: true,
         );
+
+        // generate url
+        $url = route('download-temp-file', ['fileNameEncoded' => base64_encode($fileName)]);
 
         return response()->json(["url" => $url])->setStatusCode(Response::HTTP_OK);
     }

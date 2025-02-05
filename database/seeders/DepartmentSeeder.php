@@ -13,6 +13,8 @@ class DepartmentSeeder extends Seeder
      */
     public function run(): void
     {
+        Department::truncate();
+
         Department::create([
             'name' => 'IT',
         ]);

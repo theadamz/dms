@@ -68,6 +68,7 @@
                                     <th>Username</th>
                                     <th>Email</th>
                                     <th>Name</th>
+                                    <th>Department</th>
                                     <th>Role</th>
                                     <th>Timezone</th>
                                     <th class="text-center">Active</th>
@@ -116,7 +117,15 @@
                             <div class="col-md-12">
                                 <div class="form-group fv-row">
                                     <label class="form-label font-weight-normal mb-1">Password</label>
-                                    <input type="password" id="password" name="password" class="form-control font-weight-normal" placeholder="Password" maxlength="150" autocomplete="off" />
+                                    <div class="input-group">
+                                        <input type="password" id="password" name="password" class="form-control font-weight-normal" placeholder="Password" maxlength="150" autocomplete="off" />
+                                        <div class="input-group-append">
+                                            <button type="button" class="btn btn-outline-secondary input-group-text" id="showPassword" for="password">
+                                                <i class="fas fa-eye"></i>
+                                                <i class="fas fa-eye-slash d-none"></i>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-12">
@@ -130,6 +139,15 @@
                                     <x-inputs.picture label="Picture" element-name="picture" :no-picture-url="url('/assets/images/_photo_profile_blank.png')" />
                                 </div>
                                 <div class="col-md-8">
+                                    <div class="form-group fv-row">
+                                        <label class="form-label font-weight-normal mb-1">Department <span class="text-danger">*</span></label>
+                                        <select class="form-control font-weight-normal form-select2" id="department" name="department" data-dropdown-parent="#modalFormInput" data-allow-clear="false">
+                                            <option value=""></option>
+                                            @foreach ($departments as $department)
+                                                <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                     <div class="form-group fv-row">
                                         <label class="form-label font-weight-normal mb-1">Role <span class="text-danger">*</span></label>
                                         <select class="form-control font-weight-normal form-select2" id="role" name="role" data-dropdown-parent="#modalFormInput" data-allow-clear="false">
@@ -162,8 +180,8 @@
                     <!--end::Form-->
                 </div>
                 <div class="modal-footer justify-content-between">
-                    <button type="button" form="formInput" class="btn btn-default" data-dismiss="modal"
-                            id="cancel" name="cancel"><i class="fa fa-times mr-2"></i> Cancel
+                    <button type="button" form="formInput" class="btn btn-default" data-dismiss="modal" id="cancel" name="cancel">
+                        <i class="fa fa-times mr-2"></i> Cancel
                     </button>
                     <button type="submit" form="formInput" class="btn btn-success" id="save" name="save">
                         <span class="indicator-label"><i class="fas fa-save mr-2"></i> Save</span>
@@ -194,26 +212,33 @@
                         <div class="row">
                             <div class="col-12">
                                 <div class="form-group fv-row">
-                                    <label class="form-label font-weight-normal mb-1">Active</label>
-                                    <select class="form-control font-weight-normal form-select2" id="filter_is_active"
-                                            name="filter_is_active" data-hide-search="true"
-                                            data-dropdown-parent="#modalFormFilter">
+                                    <label class="form-label font-weight-normal mb-1">Department</label>
+                                    <select class="form-control font-weight-normal form-select2" id="filter_department" name="filter_department" data-dropdown-parent="#modalFormFilter" data-allow-clear="false">
                                         <option value=""></option>
-                                        <option value="true">Yes</option>
-                                        <option value="false">No</option>
+                                        @foreach ($departments as $department)
+                                            <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="form-group fv-row">
                                     <label class="form-label font-weight-normal mb-1">Role</label>
-                                    <select class="form-control font-weight-normal form-select2" id="filter_role"
-                                            name="filter_role" data-dropdown-parent="#modalFormFilter"
-                                            data-allow-clear="false">
+                                    <select class="form-control font-weight-normal form-select2" id="filter_role" name="filter_role" data-dropdown-parent="#modalFormFilter" data-allow-clear="false">
                                         <option value=""></option>
                                         @foreach ($roles as $role)
                                             <option value="{{ $role['id'] }}">{{ $role['name'] }}</option>
                                         @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group fv-row">
+                                    <label class="form-label font-weight-normal mb-1">Active</label>
+                                    <select class="form-control font-weight-normal form-select2" id="filter_is_active" name="filter_is_active" data-hide-search="true" data-dropdown-parent="#modalFormFilter">
+                                        <option value=""></option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
                                     </select>
                                 </div>
                             </div>
@@ -222,12 +247,10 @@
                     <!--end::Form-->
                 </div>
                 <div class="modal-footer justify-content-between">
-                    <button type="reset" form="formFilter" class="btn btn-default" id="filterReset"
-                            name="filterReset">
+                    <button type="reset" form="formFilter" class="btn btn-default" id="filterReset" name="filterReset">
                         <i class="fas fa-times-circle mr-2"></i> Reset
                     </button>
-                    <button type="submit" form="formFilter" class="btn btn-primary" id="filterApply"
-                            name="filterApply">
+                    <button type="submit" form="formFilter" class="btn btn-primary" id="filterApply" name="filterApply">
                         <i class="fas fa-check mr-2"></i> Apply
                     </button>
                 </div>

@@ -6,14 +6,13 @@ import {
 } from "../../../application";
 import {
     axiosCustom,
-    cfTnyMCE,
     dateFormat,
     formValidationSetErrorMessages,
+    initMaxLength,
     initselect2AjaxCustomOption,
     initTempusDateTimePicker,
     MsgBox,
     refactorErrorMessages,
-    setContentTinyeMCE,
     setTempusDateTimePicker,
     showBlockUIElement,
     showProgressButton
@@ -21,8 +20,15 @@ import {
 
 let _formValidationUser = null;
 let _formValidationApprovalSet = null;
+
+// for inputs
+let workFlowSectionSelected = 'approval';
 let documentFiles = [];
 let approvalUsers = [];
+let isReviewRequired = false;
+let reviewUsers = [];
+let isAcknowledgementRequired = false;
+let acknowledgementUsers = [];
 
 function initFormValidation() {
     _formValidation = $(document.querySelector('#formInput')).validate({
@@ -39,11 +45,11 @@ function initFormValidation() {
             category_sub: {
                 required: true,
             },
-            req_review: {
-                required: true,
+            review_workflow_type: {
+                required: isReviewRequired,
             },
-            req_acknowledgement: {
-                required: true,
+            acknowledgement_workflow_type: {
+                required: isAcknowledgementRequired,
             },
             is_locked: {
                 required: true,
@@ -56,29 +62,29 @@ function initFormValidation() {
         }
     });
 
-    _formValidationUser = $(document.querySelector('#formUser')).validate({
+    _formValidationUser = $(document.querySelector('#formWorkflowUser')).validate({
         rules: {
-            users: {
+            workflowUsers: {
                 required: true,
             },
         },
         submitHandler: function (form, e) {
             e.preventDefault();
 
-            if ($(form).valid()) approvalWorkflowAdd($('#users').select2('data'));
+            if ($(form).valid()) workflowAddUsers($('#workflowUsers').select2('data'));
         }
     });
 
-    _formValidationApprovalSet = $(document.querySelector('#formApprovalSet')).validate({
+    _formValidationApprovalSet = $(document.querySelector('#formWorkflowUserSet')).validate({
         rules: {
-            approval_set: {
+            workflowUsersSet: {
                 required: true,
             },
         },
         submitHandler: function (form, e) {
             e.preventDefault();
 
-            if ($(form).valid()) approvalWorkflowUsersSet($('#approval_set').select2('data')[0]);
+            if ($(form).valid()) workflowAddUsersSet($('#workflowUsersSet').select2('data')[0]);
         }
     });
 }
@@ -86,7 +92,6 @@ function initFormValidation() {
 function initOtherElements() {
     // formInput
     initTempusDateTimePicker('#due_date', 'date');
-    cfTnyMCE('#notes', 'notes', 200);
 
     // general information -- events
     $('#use_due_date').on('change', function () {
@@ -116,11 +121,21 @@ function initOtherElements() {
     });
     document.getElementById('clear').addEventListener('click', formInputClear);
 
+    // users and approval set -- events
+    $('#modalFormWorkflowUser').on('hidden.bs.modal', formWorkflowUserClear);
+    initselect2AjaxCustomOption("#workflowUsers", "Select", `${_baseURL}/options/configs/users`, 2, select2TemplateOptions.userResult, select2TemplateOptions.userSelection, false, true, true, _limit, false);
+    $('#modalFormWorkflowUserSet').on('hidden.bs.modal', formWorkflowUserSetClear);
+    initselect2AjaxCustomOption("#workflowUsersSet", "Select", `${_baseURL}/options/basics/approval-sets`, 2, select2TemplateOptions.defaultResult, select2TemplateOptions.defaultSelection);
+
     // approval workflow -- events
-    $('#modalFormUser').on('hidden.bs.modal', formUserClear);
-    initselect2AjaxCustomOption("#users", "Select", `${_baseURL}/options/configs/users`, 2, select2TemplateOptions.userResult, select2TemplateOptions.userSelection, false, true, true, _limit, false);
-    $('#modalFormApprovalSet').on('hidden.bs.modal', formApprovalSetClear);
-    initselect2AjaxCustomOption("#approval_set", "Select", `${_baseURL}/options/basics/approval-sets`, 2, select2TemplateOptions.defaultResult, select2TemplateOptions.defaultSelection);
+    document.getElementById('addApprovalUsers').addEventListener('click', function () {
+        workFlowSectionSelected = 'approval'; // set section selected
+        $('#modalFormWorkflowUser').modal('show'); // show modal
+    });
+    document.getElementById('addApprovalUsersSet').addEventListener('click', function () {
+        workFlowSectionSelected = 'approval'; // set section selected
+        $('#modalFormWorkflowUserSet').modal('show'); // show modal
+    });
     $('#approvalWorkflowContainer').sortable({
         handle: '.approval-workflow-user-handle-order',
         invertSwap: true,
@@ -129,11 +144,85 @@ function initOtherElements() {
         ghostClass: 'ghost',
         onSort: approvalWorkflowRender,
     });
+
+    // approval workflow -- events
+    document.getElementById('addReviewWorkFlow').addEventListener('click', function () {
+        isReviewRequired = true;
+        $('#reviewWorkflowCard').removeClass('d-none');
+        $('#addReviewWorkFlow').addClass('d-none');
+    });
+    document.getElementById('removeReviewWorkFlow').addEventListener('click', async function () {
+        const confirmation = await MsgBox.Confirm('Are you sure?').catch(err => {
+            if (err) console.log(err)
+        });
+        if (!confirmation) return;
+
+        isReviewRequired = false;
+        $('#reviewWorkflowCard').addClass('d-none');
+        $('#addReviewWorkFlow').removeClass('d-none');
+        reviewUsers = [];
+    });
+    document.getElementById('addReviewUsers').addEventListener('click', function () {
+        workFlowSectionSelected = 'review'; // set section selected
+        $('#modalFormWorkflowUser').modal('show'); // show modal
+    });
+    document.getElementById('addReviewApprovalSet').addEventListener('click', function () {
+        workFlowSectionSelected = 'review'; // set section selected
+        $('#modalFormWorkflowUserSet').modal('show'); // show modal
+    });
+    $('#reviewWorkflowContainer').sortable({
+        handle: '.review-workflow-user-handle-order',
+        invertSwap: true,
+        group: 'list',
+        animation: 200,
+        ghostClass: 'ghost',
+        onSort: reviewWorkflowRender,
+    });
+
+    // acknowledgement workflow -- events
+    document.getElementById('addAcknowledgementWorkFlow').addEventListener('click', function () {
+        isAcknowledgementRequired = true;
+        $('#acknowledgementWorkflowCard').removeClass('d-none');
+        $('#addAcknowledgementWorkFlow').addClass('d-none');
+    });
+    document.getElementById('removeAcknowledgementWorkFlow').addEventListener('click', async function () {
+        const confirmation = await MsgBox.Confirm('Are you sure?').catch(err => {
+            if (err) console.log(err)
+        });
+        if (!confirmation) return;
+
+        isAcknowledgementRequired = false;
+        $('#acknowledgementWorkflowCard').addClass('d-none');
+        $('#addAcknowledgementWorkFlow').removeClass('d-none');
+        reviewUsers = [];
+    });
+    document.getElementById('addAcknowledgementUsers').addEventListener('click', function () {
+        workFlowSectionSelected = 'acknowledgement'; // set section selected
+        $('#modalFormWorkflowUser').modal('show'); // show modal
+    });
+    document.getElementById('addAcknowledgementApprovalSet').addEventListener('click', function () {
+        workFlowSectionSelected = 'acknowledgement'; // set section selected
+        $('#modalFormWorkflowUserSet').modal('show'); // show modal
+    });
+    $('#acknowledgementWorkflowContainer').sortable({
+        handle: '.acknowledgement-workflow-user-handle-order',
+        invertSwap: true,
+        group: 'list',
+        animation: 200,
+        ghostClass: 'ghost',
+        onSort: acknowledgementWorkflowRender,
+    });
+}
+
+function initMaxLengthForm() {
+    initMaxLength('#notes');
 }
 
 function initActions() {
     documentFilesRender();
     approvalWorkflowRender();
+    reviewWorkflowRender();
+    acknowledgementWorkflowRender();
 }
 
 async function saveData() {
@@ -146,6 +235,18 @@ async function saveData() {
     // check approval
     if (approvalUsers.length <= 0) {
         MsgBox.HtmlNotification('Approval users empty');
+        return;
+    }
+
+    // check review
+    if (isReviewRequired && reviewUsers.length <= 0) {
+        MsgBox.HtmlNotification('Review users empty');
+        return;
+    }
+
+    // check acknowledgement
+    if (isAcknowledgementRequired && acknowledgementUsers.length <= 0) {
+        MsgBox.HtmlNotification('Acknowledgement users empty');
         return;
     }
 
@@ -162,6 +263,8 @@ async function saveData() {
     _data2Send = new FormData($('#formInput')[0]);
     _data2Send.append("due_date", dateFormat($('#due_date').datetimepicker('viewDate'), 'YYYY-MM-DD'));
     _data2Send.append('approval_users', JSON.stringify(approvalUsers));
+    _data2Send.append('review_users', JSON.stringify(reviewUsers));
+    _data2Send.append('acknowledgement_users', JSON.stringify(acknowledgementUsers));
     documentFiles.forEach(file => {
         _data2Send.append('files[]', file.file_uri);
     });
@@ -256,13 +359,309 @@ function documentFilesRemove() {
 
 // ./ document files ===============
 
+// workflow users / approval set ===============
+
+function workflowAddUsers(selectedUsers) {
+    switch (workFlowSectionSelected) {
+        case "approval":
+            approvalWorkflowAdd(selectedUsers);
+            break;
+
+        case "review":
+            reviewWorkflowAdd(selectedUsers);
+            break;
+
+        case "acknowledgement":
+            acknowledgementWorkflowAdd(selectedUsers);
+            break;
+
+    }
+}
+
+function workflowAddUsersSet(approvalSet) {
+    switch (workFlowSectionSelected) {
+        case "approval":
+            approvalWorkflowUsersSet(approvalSet);
+            break;
+
+        case "review":
+            reviewWorkflowUsersSet(approvalSet);
+            break;
+
+        case "acknowledgement":
+            acknowledgementWorkflowUsersSet(approvalSet);
+            break;
+
+    }
+}
+
+// ./ workflow users / approval set ===============
+
+// acknowledgement workflow ===============
+
+function acknowledgementWorkflowAdd(selectedUsers) {
+    if (!selectedUsers) return;
+
+    showProgressButton(true, '#workflowUsersAdd');
+    showBlockUIElement('#formWorkflowUser');
+
+    selectedUsers.forEach(user => {
+        // check if user already exist
+        if (acknowledgementUsers.find(u => u.id === user.id)) return;
+
+        // add user
+        acknowledgementUsers.push({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            order: acknowledgementUsers.length + 1
+        })
+    });
+
+    showProgressButton(false, '#workflowUsersAdd');
+    showBlockUIElement('#formWorkflowUser', false);
+
+    $('#modalFormWorkflowUser').modal('hide');
+    acknowledgementWorkflowRender();
+}
+
+function acknowledgementWorkflowRender() {
+    // clear events
+    $('.acknowledgement-workflow-user-remove').off('click');
+
+    if (reviewUsers.length <= 0) {
+        $('#reviewWorkflowContainer').html(`<div class="d-flex flex-grow-1 justify-content-center align-items-center">No workflow found</div>`);
+        return;
+    }
+
+    // reordering
+    acknowledgementWorkflowReorder();
+
+    let html = '';
+    acknowledgementUsers.forEach((user, index) => {
+        html += `<div class="list-group-item list-group-item-action acknowledgement-workflow-user-handle-order" data-id="${user.id}">
+                    <div class="d-flex align-items-center">
+                        <h4 class="mr-3">#${user.order}</h4>
+                        <div class="d-flex flex-grow-1 justify-content-between">
+                            <div class="d-flex flex-column">
+                                <span class="font-weight-bold mb-1">${user.name}</span>
+                                <span class="mb-1">${user.email}</span>
+                            </div>
+                            <button type="button" class="btn btn-sm text-danger acknowledgement-workflow-user-remove" data-id="${user.id}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+    });
+
+    $('#acknowledgementWorkflowContainer').html(html);
+
+    // init events
+    $('.acknowledgement-workflow-user-remove').on('click', acknowledgementWorkflowRemove);
+}
+
+function acknowledgementWorkflowRemove() {
+    const id = $(this).data('id');
+    const data = acknowledgementUsers.find(item => item.id == id);
+    if (!data) return;
+
+    // filter data to remove
+    acknowledgementUsers = acknowledgementUsers.filter(item => item.id != id);
+
+    acknowledgementWorkflowRender();
+}
+
+function acknowledgementWorkflowReorder() {
+    // get orders from tr data-id
+    const orderIds = $('#acknowledgementWorkflowContainer').sortable('toArray');
+
+    let order = 1;
+    orderIds.forEach((id, index) => {
+        // get which index is data stored
+        const dataIndex = acknowledgementUsers.findIndex(item => item.id == id);
+
+        // if not found
+        if (dataIndex < 0) return;
+
+        // reassign order
+        acknowledgementUsers[dataIndex].order = order++;
+    });
+
+    // sort
+    acknowledgementUsers.sort((a, b) => a.order - b.order);
+}
+
+async function acknowledgementWorkflowUsersSet(approvalSet) {
+    if (!approvalSet) return;
+
+    if (acknowledgementUsers.length > 0) {
+        const confirmation = await MsgBox.ConfirmTripleButtons('What do you want to do?', 'Workflow not empty', 'question', ['Replace', 'Append', 'Cancel']).catch(err => {
+            if (err) console.log(err)
+        });
+        if (confirmation.isDismissed) return;
+        if (confirmation.isConfirmed) {
+            acknowledgementUsers = [];
+        }
+    }
+
+    showProgressButton(true, '#workflowUsersSetAdd');
+    showBlockUIElement('#formWorkflowUserSet');
+
+    // get data
+    const response = await getOptionsAjax(`${_baseURL}/options/basics/approval-sets/${approvalSet.id}`);
+
+    showProgressButton(false, '#workflowUsersSetAdd');
+    showBlockUIElement('#formWorkflowUserSet', false);
+    $('#modalFormWorkflowUserSet').modal('hide');
+
+    // if response null
+    if (!response) return;
+
+    // get data options
+    const options = response.data;
+
+    acknowledgementWorkflowAdd(options);
+}
+
+// ./ acknowledgement workflow ===============
+
+// review workflow ===============
+
+function reviewWorkflowAdd(selectedUsers) {
+    if (!selectedUsers) return;
+
+    showProgressButton(true, '#workflowUsersAdd');
+    showBlockUIElement('#formWorkflowUser');
+
+    selectedUsers.forEach(user => {
+        // check if user already exist
+        if (reviewUsers.find(u => u.id === user.id)) return;
+
+        // add user
+        reviewUsers.push({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            order: reviewUsers.length + 1
+        })
+    });
+
+    showProgressButton(false, '#workflowUsersAdd');
+    showBlockUIElement('#formWorkflowUser', false);
+
+    $('#modalFormWorkflowUser').modal('hide');
+    reviewWorkflowRender();
+}
+
+function reviewWorkflowRender() {
+    // clear events
+    $('.review-workflow-user-remove').off('click');
+
+    if (reviewUsers.length <= 0) {
+        $('#reviewWorkflowContainer').html(`<div class="d-flex flex-grow-1 justify-content-center align-items-center">No workflow found</div>`);
+        return;
+    }
+
+    // reordering
+    reviewWorkflowReorder();
+
+    let html = '';
+    reviewUsers.forEach((user, index) => {
+        html += `<div class="list-group-item list-group-item-action review-workflow-user-handle-order" data-id="${user.id}">
+                    <div class="d-flex align-items-center">
+                        <h4 class="mr-3">#${user.order}</h4>
+                        <div class="d-flex flex-grow-1 justify-content-between">
+                            <div class="d-flex flex-column">
+                                <span class="font-weight-bold mb-1">${user.name}</span>
+                                <span class="mb-1">${user.email}</span>
+                            </div>
+                            <button type="button" class="btn btn-sm text-danger review-workflow-user-remove" data-id="${user.id}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+    });
+
+    $('#reviewWorkflowContainer').html(html);
+
+    // init events
+    $('.review-workflow-user-remove').on('click', reviewWorkflowRemove);
+}
+
+function reviewWorkflowRemove() {
+    const id = $(this).data('id');
+    const data = reviewUsers.find(item => item.id == id);
+    if (!data) return;
+
+    // filter data to remove
+    reviewUsers = reviewUsers.filter(item => item.id != id);
+
+    reviewWorkflowRender();
+}
+
+function reviewWorkflowReorder() {
+    // get orders from tr data-id
+    const orderIds = $('#reviewWorkflowContainer').sortable('toArray');
+
+    let order = 1;
+    orderIds.forEach((id, index) => {
+        // get which index is data stored
+        const dataIndex = reviewUsers.findIndex(item => item.id == id);
+
+        // if not found
+        if (dataIndex < 0) return;
+
+        // reassign order
+        reviewUsers[dataIndex].order = order++;
+    });
+
+    // sort
+    reviewUsers.sort((a, b) => a.order - b.order);
+}
+
+async function reviewWorkflowUsersSet(approvalSet) {
+    if (!approvalSet) return;
+
+    if (reviewUsers.length > 0) {
+        const confirmation = await MsgBox.ConfirmTripleButtons('What do you want to do?', 'Workflow not empty', 'question', ['Replace', 'Append', 'Cancel']).catch(err => {
+            if (err) console.log(err)
+        });
+        if (confirmation.isDismissed) return;
+        if (confirmation.isConfirmed) {
+            reviewUsers = [];
+        }
+    }
+
+    showProgressButton(true, '#workflowUsersSetAdd');
+    showBlockUIElement('#formWorkflowUserSet');
+
+    // get data
+    const response = await getOptionsAjax(`${_baseURL}/options/basics/approval-sets/${approvalSet.id}`);
+
+    showProgressButton(false, '#workflowUsersSetAdd');
+    showBlockUIElement('#formWorkflowUserSet', false);
+    $('#modalFormWorkflowUserSet').modal('hide');
+
+    // if response null
+    if (!response) return;
+
+    // get data options
+    const options = response.data;
+
+    reviewWorkflowAdd(options);
+}
+
+// ./ review workflow ===============
+
 // approval workflow ===============
 
 function approvalWorkflowAdd(selectedUsers) {
     if (!selectedUsers) return;
 
-    showProgressButton(true, '#addUser');
-    showBlockUIElement('#formUser');
+    showProgressButton(true, '#workflowUsersAdd');
+    showBlockUIElement('#formWorkflowUser');
 
     selectedUsers.forEach(user => {
         // check if user already exist
@@ -277,10 +676,10 @@ function approvalWorkflowAdd(selectedUsers) {
         })
     });
 
-    showProgressButton(false, '#addUser');
-    showBlockUIElement('#formUser', false);
+    showProgressButton(false, '#workflowUsersAdd');
+    showBlockUIElement('#formWorkflowUser', false);
 
-    $('#modalFormUser').modal('hide');
+    $('#modalFormWorkflowUser').modal('hide');
     approvalWorkflowRender();
 }
 
@@ -364,15 +763,15 @@ async function approvalWorkflowUsersSet(approvalSet) {
         }
     }
 
-    showProgressButton(true, '#addApprovalSetUsers');
-    showBlockUIElement('#formApprovalSet');
+    showProgressButton(true, '#workflowUsersSetAdd');
+    showBlockUIElement('#formWorkflowUserSet');
 
     // get data
     const response = await getOptionsAjax(`${_baseURL}/options/basics/approval-sets/${approvalSet.id}`);
 
-    showProgressButton(false, '#addApprovalSetUsers');
-    showBlockUIElement('#formApprovalSet', false);
-    $('#modalFormApprovalSet').modal('hide');
+    showProgressButton(false, '#workflowUsersSetAdd');
+    showBlockUIElement('#formWorkflowUserSet', false);
+    $('#modalFormWorkflowUserSet').modal('hide');
 
     // if response null
     if (!response) return;
@@ -398,7 +797,6 @@ function formInputClear() {
     $('#category_sub').val(null).empty().trigger('change');
     $('#req_review').prop('selectedIndex', 0).trigger('change');
     $('#req_acknowledgement').prop('selectedIndex', 0).trigger('change');
-    setContentTinyeMCE('notes', '<p></p>');
     $('#is_locked').prop('selectedIndex', 0).trigger('change');
     documentFiles = [];
     documentFilesRender();
@@ -406,20 +804,21 @@ function formInputClear() {
     approvalWorkflowRender();
 }
 
-function formUserClear() {
+function formWorkflowUserClear() {
     _formValidationUser.resetForm();
-    $('#formUser')[0].reset();
-    $('#users').val(null).empty().trigger('change');
+    $('#formWorkflowUser')[0].reset();
+    $('#workflowUsers').val(null).empty().trigger('change');
 }
 
-function formApprovalSetClear() {
+function formWorkflowUserSetClear() {
     _formValidationApprovalSet.resetForm();
-    $('#formApprovalSet')[0].reset();
-    $('#approval_set').val(null).empty().trigger('change');
+    $('#formWorkflowUserSet')[0].reset();
+    $('#workflowUsersSet').val(null).empty().trigger('change');
 }
 
 document.addEventListener("DOMContentLoaded", function () {
     initFormValidation();
     initOtherElements();
     initActions();
+    initMaxLengthForm();
 });

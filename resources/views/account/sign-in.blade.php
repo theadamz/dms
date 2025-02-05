@@ -66,8 +66,7 @@
                         <div class="form-group mb-3">
                             <div class="input-group">
                                 <div class="input-group-append">
-                                    <button type="button" class="btn btn-outline-secondary input-group-text"
-                                            id="showPassword" for="password">
+                                    <button type="button" class="btn btn-outline-secondary input-group-text" id="showPassword" for="password">
                                         <i class="fas fa-eye"></i>
                                         <i class="fas fa-eye-slash d-none"></i>
                                     </button>
@@ -80,8 +79,7 @@
                         </div>
                         <div class="form-group mb-3">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="remember" name="remember"
-                                       value="1" checked>
+                                <input class="form-check-input" type="checkbox" id="remember" name="remember" value="1" checked>
                                 <label class="form-check-label text-sm" for="remember">Remember Me</label>
                             </div>
                         </div>

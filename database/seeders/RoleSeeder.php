@@ -13,6 +13,8 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
+        Role::truncate();
+
         Role::create([
             'id' => '00000000-0000-0000-0000-000000000000',
             'code' => 'dev',

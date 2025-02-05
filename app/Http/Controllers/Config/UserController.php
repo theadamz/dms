@@ -9,6 +9,7 @@ use App\Http\Requests\Config\ResetPasswordRequest;
 use App\Http\Requests\Config\SignUpRequest;
 use App\Http\Requests\Config\UserCreateRequest;
 use App\Http\Requests\Config\UserUpdateRequest;
+use App\Models\Config\Department;
 use App\Models\Config\Role;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
@@ -44,10 +45,13 @@ class UserController extends Controller
         // get roles
         $roles = Role::all();
 
+        // get department
+        $departments = Department::where('is_active', true)->get(['id', 'name']);
+
         // get timezone
         $timezones = GeneralHelper::getTimezone();
 
-        return view('config.user', compact('roles', 'timezones'));
+        return view('config.user', compact('roles', 'departments', 'timezones'));
     }
 
     public function indexRegister(): View
@@ -97,8 +101,8 @@ class UserController extends Controller
 
     public function datatable(Request $request): JsonResponse
     {
-        $queries = DB::table("users", "u")->leftJoin("roles AS r", "r.id", "=", "u.role_id")
-            ->selectRaw("u.id, u.username, u.email, u.name, r.name AS role_name, u.timezone, u.is_active")
+        $queries = DB::table("users", "u")->leftJoin("roles AS r", "r.id", "=", "u.role_id")->leftJoin("departments AS d", "d.id", "=", "u.department_id")
+            ->selectRaw("u.id, u.username, u.email, u.name, d.name AS department_name, r.name AS role_name, u.timezone, u.is_active")
             ->when($request->filled('is_active'), function ($query) use ($request) {
                 return $query->where('u.is_active', filter_var($request->get('is_active'), FILTER_VALIDATE_BOOLEAN));
             })->when($request->filled('role'), function ($query) use ($request) {
@@ -137,6 +141,7 @@ class UserController extends Controller
 
         // save
         $user = new User($validated);
+        $user->department_id = $validated['department'];
         $user->role_id = $validated['role'];
         $user->email_verified_at = now();
 
@@ -200,7 +205,7 @@ class UserController extends Controller
         ])->validated();
 
         // get data
-        $data = User::where('id', $validated['id'])->select(['username', 'email', 'name', 'role_id', 'timezone', 'is_active', 'picture'])->first();
+        $data = User::where('id', $validated['id'])->select(['username', 'email', 'name', 'department_id', 'role_id', 'timezone', 'is_active', 'picture'])->first();
 
         // if data empty
         if (empty($data)) {
@@ -253,6 +258,7 @@ class UserController extends Controller
         // save changes
         $data = User::find($validated['id']);
         $data->fill($validated);
+        $data->department_id = $validated['department'];
         $data->role_id = $validated['role'];
 
         // if picture exist in request
@@ -396,7 +402,7 @@ class UserController extends Controller
         $lastId = $pagingType === 'id' && $request->has('lastId') ? $request->get('lastId') : null;
 
         // query
-        $queries = User::select('id', 'name', 'username', 'email')
+        $queries = User::select('id', 'name', 'username', 'email', 'department_id')->with(['department:id,name'])
             ->where(function ($query) use ($request) {
                 $query->orWhere('name', 'ilike', "%{$request->keyword}%")->orWhere('email', 'ilike', "%{$request->keyword}%")->orWhere('username', 'ilike', "%{$request->keyword}%");
             })->where('is_active', true)->orderBy('id');

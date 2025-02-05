@@ -4,15 +4,15 @@
         <nav class="navbar navbar-expand navbar-white shadow-sm">
             <!-- Left -->
             <ul class="navbar-nav">
-                @can('my-doc-create')
+                @can('doc-create')
                     <li class="nav-item mr-2">
                         <a href="{{ route('documents.create') }}" class="btn btn-sm btn-outline-success" id="create" name="create">
                             <i class="fas fa-plus d-inline"></i>
-                            <span class="ml-2 d-none d-sm-inline font-weight-bold">Create</span>
+                            <span class="ml-2 d-none d-sm-inline font-weight-bold">New</span>
                         </a>
                     </li>
                 @endcan
-                @can('my-doc-edit')
+                @can('doc-edit')
                     <li class="nav-item mr-2">
                         <button type="button" class="btn btn-sm btn-outline-warning" id="edit" name="edit">
                             <i class="fas fa-edit d-inline"></i>

@@ -32,6 +32,7 @@ class UserUpdateRequest extends FormRequest
             "email" => ["required", "email", "min:10", "max:255"],
             "name" => ["required", "string", "min:3", "max:255"],
             "password" => ["nullable", $password, "max:150"],
+            "department" => ["required", "uuid", Rule::exists("departments", "id")],
             "role" => ["required", "uuid", Rule::exists("roles", "id")],
             "timezone" => ["required", 'timezone'],
             "is_active" => ["required", "boolean"],

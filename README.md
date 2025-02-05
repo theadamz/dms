@@ -54,7 +54,7 @@ DMS (Document Management System)
 
 -   Migrate specific table / migration :
 
-    `php artisan migrate:refresh --path=/database/migrations/0001_01_01_000003_create_jobs_table.php`
+    `php artisan migrate:refresh --path=database/migrations/0001_01_01_000003_create_jobs_table.php`
 
 -   Run specific schedule :
 

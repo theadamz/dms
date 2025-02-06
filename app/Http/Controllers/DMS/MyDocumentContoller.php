@@ -53,8 +53,10 @@ class MyDocumentContoller extends Controller
             ->leftJoin("category_subs AS cs", "d.category_sub_id", "=", "cs.id")
             ->leftJoin("categories AS c", "cs.category_id", "=", "c.id")
             ->leftJoin("users AS u", "d.owner_id", "=", "u.id")
-            ->selectRaw("d.id, d.doc_no, d.date, d.due_date, c.name AS category_name, cs.name AS category_sub_name, u.name AS owner_name, d.approval_workflow_type,
-                        d.is_locked, d.req_review, d.is_reviewed, d.req_acknowledgement, d.is_acknowledged, d.status")
+            ->selectRaw("d.id, d.doc_no, d.date, d.due_date, c.name AS category_name, cs.name AS category_sub_name, d.notes, u.name AS owner_name,
+                        d.approval_workflow_type, d.review_workflow_type, d.is_review_required, d.is_reviewed, d.acknowledgement_workflow_type, d.is_acknowledgement_required, d.is_acknowledged,
+                        d.is_locked, d.is_public, d.status")
+            ->where("d.owner_id", Auth::id())->where("d.department_id", Session::get('department_id'))
             ->when($request->filled('date_start') && $request->filled('date_end'), function ($query) use ($request) {
                 // handle date
                 $startDate = Date::parse($request->get('date_start'))->format('Y-m-d');
@@ -62,23 +64,8 @@ class MyDocumentContoller extends Controller
 
                 return $query->whereBetween('d.date', [$startDate, $endDate]);
             })
-            ->when($request->filled('is_locked'), function ($query) use ($request) {
-                return $query->where('d.is_locked', filter_var($request->get('is_locked'), FILTER_VALIDATE_BOOLEAN));
-            })
-            ->when($request->filled('req_review'), function ($query) use ($request) {
-                return $query->where('d.req_review', filter_var($request->get('req_review'), FILTER_VALIDATE_BOOLEAN));
-            })
-            ->when($request->filled('req_acknowledge'), function ($query) use ($request) {
-                return $query->where('d.req_acknowledgement', filter_var($request->get('req_acknowledge'), FILTER_VALIDATE_BOOLEAN));
-            })
             ->when($request->filled('approval_workflow_type'), function ($query) use ($request) {
                 return $query->where('d.approval_workflow_type', $request->get('approval_workflow_type'));
-            })
-            ->when($request->filled('is_reviewed'), function ($query) use ($request) {
-                return $query->where('d.is_reviewed', filter_var($request->get('is_reviewed'), FILTER_VALIDATE_BOOLEAN));
-            })
-            ->when($request->filled('is_acknowledged'), function ($query) use ($request) {
-                return $query->where('d.is_acknowledged', filter_var($request->get('is_acknowledged'), FILTER_VALIDATE_BOOLEAN));
             })
             ->when($request->filled('category'), function ($query) use ($request) {
                 return $query->where('cs.category_id', $request->get('category'));
@@ -86,13 +73,47 @@ class MyDocumentContoller extends Controller
             ->when($request->filled('category_sub'), function ($query) use ($request) {
                 return $query->where('d.category_sub_id', $request->get('category_sub'));
             })
+            ->when($request->filled('review_workflow_type'), function ($query) use ($request) {
+                return $query->where('d.review_workflow_type', $request->get('review_workflow_type'));
+            })
+            ->when($request->filled('is_review_required'), function ($query) use ($request) {
+                return $query->where('d.is_review_required', filter_var($request->get('is_review_required'), FILTER_VALIDATE_BOOLEAN));
+            })
+            ->when($request->filled('is_reviewed'), function ($query) use ($request) {
+                return $query->where('d.is_reviewed', filter_var($request->get('is_reviewed'), FILTER_VALIDATE_BOOLEAN));
+            })
+
+            ->when($request->filled('acknowledgement_workflow_type'), function ($query) use ($request) {
+                return $query->where('d.acknowledgement_workflow_type', $request->get('acknowledgement_workflow_type'));
+            })
+            ->when($request->filled('is_acknowledgement_required'), function ($query) use ($request) {
+                return $query->where('d.is_acknowledgement_required', filter_var($request->get('is_acknowledgement_required'), FILTER_VALIDATE_BOOLEAN));
+            })
+            ->when($request->filled('is_acknowledged'), function ($query) use ($request) {
+                return $query->where('d.is_acknowledged', filter_var($request->get('is_acknowledged'), FILTER_VALIDATE_BOOLEAN));
+            })
+            ->when($request->filled('is_locked'), function ($query) use ($request) {
+                return $query->where('d.is_locked', filter_var($request->get('is_locked'), FILTER_VALIDATE_BOOLEAN));
+            })
+            ->when($request->filled('is_public'), function ($query) use ($request) {
+                return $query->where('d.is_public', filter_var($request->get('is_public'), FILTER_VALIDATE_BOOLEAN));
+            })
             ->when($request->filled('status'), function ($query) use ($request) {
                 return $query->whereIn('d.status', $request->get('status'));
             });
 
         return DataTables::query($queries)
+            ->editColumn('notes', function ($data) {
+                return str($data->notes)->words(5);
+            })
             ->editColumn('approval_workflow_type', function ($data) {
                 return WorkflowType::tryFrom($data->approval_workflow_type)->getLabel();
+            })
+            ->editColumn('review_workflow_type', function ($data) {
+                return WorkflowType::tryFrom($data->review_workflow_type)->getLabel();
+            })
+            ->editColumn('acknowledgement_workflow_type', function ($data) {
+                return WorkflowType::tryFrom($data->acknowledgement_workflow_type)->getLabel();
             })
             ->editColumn('status', function ($data) {
                 return '<span class="badge badge-' . DocumentStatus::tryFrom($data->status)->getBadge() . '">' . DocumentStatus::tryFrom($data->status)->getLabel() . '</span>';
@@ -131,17 +152,44 @@ class MyDocumentContoller extends Controller
             dueDate: !empty($validated['due_date']) ? Date::parse($validated['due_date']) : null,
             categorySubId: $validated['category_sub'],
             ownerId: Auth::id(),
+            departmentId: Auth::user()->department_id,
+            refDocId: $validated['ref_doc_id'],
             notes: $validated['notes'],
             approvalWorkflowType: WorkflowType::tryFrom($validated['approval_workflow_type']),
-            isLocked: $validated['is_locked'],
-            reviewWorkflowType: WorkflowType::tryFrom($validated['approval_workflow_type']),
-            reqReview: $validated['req_review'],
-            acknowledgementWorkflowType: WorkflowType::INORDER,
-            reqAcknowledgement: $validated['req_acknowledgement'],
-            files: $validated['files'],
             approvalUsers: $validated['approval_users'],
+            reviewWorkflowType: WorkflowType::tryFrom($validated['review_workflow_type']),
+            isReviewRequired: $validated['is_review_required'],
+            reviewUsers: $validated['review_users'],
+            acknowledgementWorkflowType: WorkflowType::tryFrom($validated['acknowledgement_workflow_type']),
+            isAcknowledgementRequired: $validated['is_acknowledgement_required'],
+            acknowledgementUsers: $validated['acknowledgement_users'],
+            isLocked: $validated['is_locked'],
+            isPublic: $validated['is_public'],
+            files: $validated['files'],
         );
 
         return response()->json(['message' => "Your document number : {$data->doc_no} successfully created."])->setStatusCode(Response::HTTP_CREATED);
+    }
+
+    public function edit(string $id)
+    {
+        // vendor js
+        GeneralHelper::addAdditionalVendorJS([
+            url('assets/vendor/plugins/sortable/Sortable.min.js'),
+            url('assets/vendor/plugins/sortable/jquery-sortable.min.js'),
+        ]);
+
+        // js
+        GeneralHelper::addAdditionalJS([
+            'resources/js/pages/dms/my-document/edit.js'
+        ]);
+
+        // approval type
+        $workflowTypes = WorkflowType::cases();
+
+        // get categories
+        $categories = Category::where('is_active', true)->get(['id', 'name']);
+
+        return view('dms.my-document.edit')->with(compact('workflowTypes', 'categories'));
     }
 }

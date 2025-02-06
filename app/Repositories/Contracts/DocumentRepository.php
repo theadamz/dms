@@ -8,5 +8,5 @@ use Illuminate\Support\Collection;
 
 interface DocumentRepository
 {
-    public function store(DocumentCreateData $data, Collection $files, Collection $approvalUsers): DocumentData;
+    public function store(DocumentCreateData $data, Collection $files, Collection $approvalUsers, ?Collection $reviewUsers = null, ?Collection $acknowledgementUsers = null): DocumentData;
 }

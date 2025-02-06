@@ -47,19 +47,29 @@
             <div class="container-fluid">
                 <div class="card">
                     <div class="card-body">
-                        <table id="list_datatable" name="list_datatable" class="table display nowrap compact" style="width: 100%;">
+                        <table id="list_datatable" name="list_datatable" class="table table-hover table-sm display nowrap compact" style="width: 100%;">
                             <thead>
                                 <tr>
-                                    <th>#</th>
-                                    <th>Doc. No.</th>
-                                    <th class="text-center">Date</th>
-                                    <th>Category</th>
-                                    <th>Owner</th>
-                                    <th>Approval Type</th>
-                                    <th>Locked</th>
-                                    <th>Review</th>
-                                    <th>Acknowledge</th>
-                                    <th class="text-center">Status</th>
+                                    <th rowspan="2" class="align-middle text-center">#</th>
+                                    <th rowspan="2" class="align-middle">Doc. No.</th>
+                                    <th rowspan="2" class="align-middle text-center">Date</th>
+                                    <th rowspan="2" class="align-middle">Category</th>
+                                    <th rowspan="2" class="align-middle">Notes</th>
+                                    <th rowspan="2" class="align-middle">Owner</th>
+                                    <th rowspan="2" class="align-middle">Approval Type</th>
+                                    <th colspan="3" class="text-center">Review</th>
+                                    <th colspan="3" class="text-center">Acknowledge</th>
+                                    <th rowspan="2" class="align-middle">Locked</th>
+                                    <th rowspan="2" class="align-middle">For Public</th>
+                                    <th rowspan="2" class="align-middle text-center">Status</th>
+                                </tr>
+                                <tr>
+                                    <th class="border-top-0">Is Required</th>
+                                    <th class="border-top-0">Workflow Type</th>
+                                    <th class="border-top-0">Reviewed</th>
+                                    <th class="border-top-0">Is Required</th>
+                                    <th class="border-top-0">Workflow Type</th>
+                                    <th class="border-top-0">Acknowledged</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -89,68 +99,100 @@
                     <!--begin::Form-->
                     <form id="formFilter" name="formFilter" class="form">
                         <div class="row">
-                            <div class="form-group col-md-4">
-                                <label class="form-label font-weight-normal mb-1">Locked</label>
-                                <select class="form-control font-weight-normal form-select2" id="filter_is_locked" name="filter_is_locked" data-hide-search="true" data-dropdown-parent="#modalFormFilter">
-                                    <option value=""></option>
-                                    <option value="true">Yes</option>
-                                    <option value="false">No</option>
-                                </select>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="form-label font-weight-normal mb-1">Approval Workflow Type</label>
+                                    <select class="form-control font-weight-normal form-select2" id="filter_approval_workflow_type" name="filter_filter_approval_workflow_typeapproval_type" data-hide-search="true" data-dropdown-parent="#modalFormFilter">
+                                        <option value=""></option>
+                                        @foreach ($workflowTypes as $workflowType)
+                                            <option value="{{ $workflowType->value }}">{{ $workflowType->getLabel() }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label font-weight-normal mb-1">Category</label>
+                                    <select class="form-control font-weight-normal form-select2" id="filter_category" name="filter_category" data-hide-search="true" data-dropdown-parent="#modalFormFilter">
+                                        <option value=""></option>
+                                        @foreach ($categories as $category)
+                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label font-weight-normal mb-1">Sub Category</label>
+                                    <select class="form-control font-weight-normal form-select2" id="filter_category_sub" name="filter_category_sub" data-hide-search="true" data-dropdown-parent="#modalFormFilter">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="form-group col-md-4">
-                                <label class="form-label font-weight-normal mb-1">Req. Review</label>
-                                <select class="form-control font-weight-normal form-select2" id="filter_req_review" name="filter_req_review" data-hide-search="true" data-dropdown-parent="#modalFormFilter">
-                                    <option value=""></option>
-                                    <option value="true">Yes</option>
-                                    <option value="false">No</option>
-                                </select>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="form-label font-weight-normal mb-1">Review Workflow Type</label>
+                                    <select class="form-control font-weight-normal form-select2" id="filter_review_workflow_type" name="filter_review_workflow_type" data-hide-search="true" data-dropdown-parent="#modalFormFilter">
+                                        <option value=""></option>
+                                        @foreach ($workflowTypes as $workflowType)
+                                            <option value="{{ $workflowType->value }}">{{ $workflowType->getLabel() }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label font-weight-normal mb-1">Review Required</label>
+                                    <select class="form-control font-weight-normal form-select2" id="filter_is_review_required" name="filter_is_review_required" data-hide-search="true" data-dropdown-parent="#modalFormFilter">
+                                        <option value=""></option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label font-weight-normal mb-1">Is Review</label>
+                                    <select class="form-control font-weight-normal form-select2" id="filter_is_reviewed" name="filter_is_reviewed" data-hide-search="true" data-dropdown-parent="#modalFormFilter">
+                                        <option value=""></option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="form-group col-md-4">
-                                <label class="form-label font-weight-normal mb-1">Req. Acknowledge</label>
-                                <select class="form-control font-weight-normal form-select2" id="filter_req_acknowledge" name="filter_req_acknowledge" data-hide-search="true" data-dropdown-parent="#modalFormFilter">
-                                    <option value=""></option>
-                                    <option value="true">Yes</option>
-                                    <option value="false">No</option>
-                                </select>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="form-label font-weight-normal mb-1">Acknowledgement Workflow Type</label>
+                                    <select class="form-control font-weight-normal form-select2" id="filter_acknowledgement_workflow_type" name="filter_acknowledgement_workflow_type" data-hide-search="true" data-dropdown-parent="#modalFormFilter">
+                                        <option value=""></option>
+                                        @foreach ($workflowTypes as $workflowType)
+                                            <option value="{{ $workflowType->value }}">{{ $workflowType->getLabel() }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label font-weight-normal mb-1">Acknowledgement Required</label>
+                                    <select class="form-control font-weight-normal form-select2" id="filter_is_acknowledgement_required" name="filter_is_acknowledgement_required" data-hide-search="true" data-dropdown-parent="#modalFormFilter">
+                                        <option value=""></option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label font-weight-normal mb-1">Is Acknowledged</label>
+                                    <select class="form-control font-weight-normal form-select2" id="filter_is_acknowledged" name="filter_is_acknowledged" data-hide-search="true" data-dropdown-parent="#modalFormFilter">
+                                        <option value=""></option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="form-group col-md-4">
-                                <label class="form-label font-weight-normal mb-1">Approval Workflow Type</label>
-                                <select class="form-control font-weight-normal form-select2" id="filter_approval_workflow_type" name="filter_filter_approval_workflow_typeapproval_type" data-hide-search="true" data-dropdown-parent="#modalFormFilter">
-                                    <option value=""></option>
-                                    @foreach ($workflowTypes as $workflowType)
-                                        <option value="{{ $workflowType->value }}">{{ $workflowType->getLabel() }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label class="form-label font-weight-normal mb-1">Reviewed</label>
-                                <select class="form-control font-weight-normal form-select2" id="filter_is_reviewed" name="filter_is_reviewed" data-hide-search="true" data-dropdown-parent="#modalFormFilter">
-                                    <option value=""></option>
-                                    <option value="true">Yes</option>
-                                    <option value="false">No</option>
-                                </select>
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label class="form-label font-weight-normal mb-1">Acknowledged</label>
-                                <select class="form-control font-weight-normal form-select2" id="filter_is_acknowledged" name="filter_is_acknowledged" data-hide-search="true" data-dropdown-parent="#modalFormFilter">
+                            <div class="form-group col-md-6">
+                                <label class="form-label font-weight-normal mb-1">Is Locked</label>
+                                <select class="form-control font-weight-normal form-select2" id="filter_is_locked" name="filter_is_locked" data-dropdown-parent="#modalFormFilter" data-hide-search="true">
                                     <option value=""></option>
                                     <option value="true">Yes</option>
                                     <option value="false">No</option>
                                 </select>
                             </div>
                             <div class="form-group col-md-6">
-                                <label class="form-label font-weight-normal mb-1">Category</label>
-                                <select class="form-control font-weight-normal form-select2" id="filter_category" name="filter_category" data-hide-search="true" data-dropdown-parent="#modalFormFilter">
+                                <label class="form-label font-weight-normal mb-1">For Public</label>
+                                <select class="form-control font-weight-normal form-select2" id="filter_is_public" name="filter_is_public" data-dropdown-parent="#modalFormFilter" data-hide-search="true">
                                     <option value=""></option>
-                                    @foreach ($categories as $category)
-                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="form-group col-md-6">
-                                <label class="form-label font-weight-normal mb-1">Sub Category</label>
-                                <select class="form-control font-weight-normal form-select2" id="filter_category_sub" name="filter_category_sub" data-hide-search="true" data-dropdown-parent="#modalFormFilter">
-                                    <option value=""></option>
+                                    <option value="true">Yes</option>
+                                    <option value="false">No</option>
                                 </select>
                             </div>
                             <div class="form-group col-md-6">

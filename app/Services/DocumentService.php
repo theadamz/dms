@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Data\DMS\DocumentApprovalCreateData;
+use App\Data\DMS\DocumentApprovalUserData;
 use App\Data\DMS\DocumentCreateData;
 use App\Data\DMS\DocumentData;
 use App\Data\DMS\DocumentFileCreateData;
@@ -91,16 +91,16 @@ class DocumentService
         ?string $refDocId = null,
         ?string $notes = null,
         WorkflowType $approvalWorkflowType,
-        WorkflowType $reviewWorkflowType,
+        array $approvalUsers,
         bool $isReviewRequired,
-        WorkflowType $acknowledgementWorkflowType,
+        WorkflowType $reviewWorkflowType,
+        ?array $reviewUsers = null,
         bool $isAcknowledgementRequired,
+        WorkflowType $acknowledgementWorkflowType,
+        ?array $acknowledgementUsers = null,
         bool $isLocked,
         bool $isPublic,
         array $files,
-        array $approvalUsers,
-        ?array $reviewUsers = null,
-        ?array $acknowledgementUsers = null,
     ): DocumentData {
         try {
             // handle files
@@ -113,15 +113,18 @@ class DocumentService
                 doc_no: $this->generateTicketNo($docDate),
                 date: $docDate,
                 due_date: $dueDate,
-                category_sub_id: $categorySubId,
                 owner_id: $ownerId,
+                category_sub_id: $categorySubId,
+                department_id: $departmentId,
+                ref_doc_id: $refDocId,
                 notes: $notes,
                 approval_workflow_type: $approvalWorkflowType,
-                is_locked: $isLocked,
                 review_workflow_type: $reviewWorkflowType,
-                req_review: $reqReview,
+                is_review_required: $isReviewRequired,
                 acknowledgement_workflow_type: $acknowledgementWorkflowType,
-                req_acknowledgement: $reqAcknowledgement,
+                is_acknowledgement_required: $isAcknowledgementRequired,
+                is_locked: $isLocked,
+                is_public: $isPublic,
                 status: DocumentStatus::DRAFT
             );
 
@@ -129,10 +132,16 @@ class DocumentService
             $files = DocumentFileCreateData::collect($files);
 
             // prepare approval users
-            $approvalUsers = DocumentApprovalCreateData::collect(collect($approvalUsers));
+            $approvalUsers = DocumentApprovalUserData::collect(collect($approvalUsers));
+
+            // prepare review users
+            $reviewUsers = !empty($reviewUsers) ? DocumentApprovalUserData::collect(collect($reviewUsers)) : null;
+
+            // prepare acknowledgement users
+            $acknowledgementUsers = !empty($acknowledgementUsers) ? DocumentApprovalUserData::collect(collect($acknowledgementUsers)) : null;
 
             // create
-            $document = $this->repository->store(data: $data, files: $files, approvalUsers: $approvalUsers);
+            $document = $this->repository->store(data: $data, files: $files, approvalUsers: $approvalUsers, reviewUsers: $reviewUsers, acknowledgementUsers: $acknowledgementUsers);
 
             DB::commit();
 
@@ -142,7 +151,7 @@ class DocumentService
             DB::rollBack();
 
             // if $attachmentFiles not empty
-            if (!empty($files)) {
+            if ($files->isNotEmpty()) {
                 foreach ($files->toArray() as $file) {
                     Storage::delete(config('setting.other.path_to_upload') . '/' . $file['file_name']);
                 }

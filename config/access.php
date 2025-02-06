@@ -98,7 +98,7 @@ return [
         ['code' => 'doc', 'name' => 'Documents', 'permissions' => ['read', 'create', 'edit', 'cancel', 'approve', 'reject', 'recall']],
 
         /* My Documents */
-        ['code' => 'my-doc', 'name' => 'Menu Parent My Documents & Permission', 'permissions' => ['access']],
+        ['code' => 'my-doc', 'name' => 'Menu Parent My Documents', 'permissions' => ['access']],
         ['code' => 'my-doc-new', 'name' => 'Menu My Documents - New', 'permissions' => ['access']],
         ['code' => 'my-doc-list', 'name' => 'Menu My Documents - List', 'permissions' => ['access']],
 

@@ -3,10 +3,13 @@
 namespace App\Models\DMS;
 
 use App\Models\Basic\CategorySub;
+use App\Models\Config\Department;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Facades\Auth;
 
 class Document extends Model
@@ -39,13 +42,43 @@ class Document extends Model
         });
     }
 
+    public function owner(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'owner_id');
+    }
+
     public function category_sub(): BelongsTo
     {
         return $this->belongsTo(CategorySub::class);
     }
 
-    public function owner(): BelongsTo
+    public function department(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'owner_id');
+        return $this->belongsTo(Department::class);
+    }
+
+    public function doc_parent(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'ref_doc_id');
+    }
+
+    public function files(): HasMany
+    {
+        return $this->hasMany(DocumentFile::class);
+    }
+
+    public function approval_users(): HasMany
+    {
+        return $this->hasMany(DocumentApproval::class);
+    }
+
+    public function review_users(): HasManyThrough
+    {
+        return $this->hasManyThrough(DocumentReview::class, DocumentFile::class);
+    }
+
+    public function acknowledge_users(): HasManyThrough
+    {
+        return $this->hasManyThrough(DocumentReview::class, DocumentAcknowledge::class);
     }
 }

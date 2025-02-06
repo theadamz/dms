@@ -4,7 +4,7 @@ namespace App\Data\DMS;
 
 use Spatie\LaravelData\Data;
 
-class DocumentApprovalCreateData extends Data
+class DocumentAcknowledgeUserData extends Data
 {
     public function __construct(
         public string $id,

@@ -12,6 +12,7 @@
         "laravel/tinker": "^2.10",
         "milon/barcode": "^11.0",
         "openspout/openspout": "^4.28",
+        "predis/predis": "2.0",
         "spatie/laravel-data": "^4.13",
         "yajra/laravel-datatables": "^11.0"
     },

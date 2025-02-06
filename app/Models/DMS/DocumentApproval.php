@@ -2,8 +2,10 @@
 
 namespace App\Models\DMS;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
 
 class DocumentApproval extends Model
@@ -25,5 +27,15 @@ class DocumentApproval extends Model
         static::updating(function (DocumentApproval $model) {
             $model->updated_by = Auth::id();
         });
+    }
+
+    public function document_file(): BelongsTo
+    {
+        return $this->belongsTo(DocumentFile::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

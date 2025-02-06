@@ -15,7 +15,9 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('document_file_id')->index();
             $table->uuid('user_id')->index();
+            $table->smallInteger('order');
             $table->boolean('is_acknowledged')->default(false);
+            $table->string('remarks')->nullable();
             $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();
             $table->timestamps();

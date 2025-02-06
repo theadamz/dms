@@ -19,18 +19,21 @@ class DocumentCreateData extends Data
         public DateTime $date,
         #[WithTransformer(DateTimeInterfaceTransformer::class, format: "Y-m-d")]
         public ?DateTime $due_date = null,
-        public string $category_sub_id,
         public string $owner_id,
+        public string $category_sub_id,
+        public string $department_id,
+        public ?string $ref_doc_id = null,
         public ?string $notes = null,
         #[WithCast(EnumCast::class)]
         public WorkflowType $approval_workflow_type,
-        public bool $is_locked,
         #[WithCast(EnumCast::class)]
         public WorkflowType $review_workflow_type,
-        public bool $req_review,
+        public bool $is_review_required,
         #[WithCast(EnumCast::class)]
         public WorkflowType $acknowledgement_workflow_type,
-        public bool $req_acknowledgement,
+        public bool $is_acknowledgement_required,
+        public bool $is_locked,
+        public bool $is_public,
         #[WithCast(EnumCast::class)]
         public DocumentStatus $status,
     ) {}

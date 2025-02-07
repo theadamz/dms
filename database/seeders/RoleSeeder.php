@@ -32,13 +32,13 @@ class RoleSeeder extends Seeder
         Role::create([
             'code' => 'manager',
             'name' => 'Manager',
-            'def_path' => '/my-approvals/waiting'
+            'def_path' => '/documents'
         ]);
 
         Role::create([
             'code' => 'staff',
             'name' => 'Staff',
-            'def_path' => '/my-documents/list'
+            'def_path' => '/documents'
         ]);
     }
 }

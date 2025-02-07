@@ -11,5 +11,9 @@ class DocumentReviewUserData extends Data
         public string $name,
         public string $email,
         public int $order,
-    ) {}
+        public bool $is_reviewed = false,
+        public ?string $remarks = null,
+    ) {
+        $this->remarks = null;
+    }
 }

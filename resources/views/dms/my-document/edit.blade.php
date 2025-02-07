@@ -12,18 +12,11 @@
                         </a>
                     </li>
                 @endcan
-                <div class="border-left text-center mx-2">&nbsp;</div>
-                <li class="nav-item mr-2">
-                    <button type="button" class="btn btn-sm btn-outline-info" id="clear" name="clear">
-                        <i class="fas fa-times d-inline"></i>
-                        <span class="ml-2 d-none d-sm-inline font-weight-bold">Clear</span>
-                    </button>
-                </li>
             </ul>
 
             <!-- Right -->
             <ul class="navbar-nav ml-auto">
-                @can('doc-create')
+                @can('doc-edit')
                     <li class="nav-item mr-2">
                         <button type="submit" form="formInput" class="btn btn-success" id="save" name="save">
                             <span class="indicator-label"><i class="fas fa-save mr-2"></i> Submit</span>
@@ -41,7 +34,8 @@
     <section class="content">
         <section class="flex-column-fluid">
             <div class="container-fluid">
-                <form id="formInput" name="formInput" class="form" method="POST" action="{{ route('documents.store') }}" enctype="multipart/form-data">
+                <form id="formInput" name="formInput" class="form" method="POST" action="{{ route('documents.edit', ['id' => $data->id]) }}" enctype="multipart/form-data">
+                    @method('put')
                     @csrf
                     <div class="row">
                         <div class="col-md-8">
@@ -53,10 +47,10 @@
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-4">
-                                            <x-inputs.textbox label="Owner" element-name="owner_name" addClass="ignore" :readonly="true" value="{{ session('name') }} - {{ session('department_name') }}" />
+                                            <x-inputs.textbox label="Owner" element-name="owner_name" addClass="ignore" :readonly="true" value="{{ $data->owner_name }} - {{ $data->department_name }}" />
                                         </div>
                                         <div class="col-md-4">
-                                            <x-inputs.textbox label="Date" element-name="date" addClass="ignore" :readonly="true" value="{{ app()->general->dateFormat(now()) }}" />
+                                            <x-inputs.textbox label="Date" element-name="date" addClass="ignore" :readonly="true" value="{{ app()->general->dateFormat($data->date) }}" />
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group fv-row">
@@ -64,10 +58,10 @@
                                                 <div class="input-group date" id="due_date" data-target-input="[name='due_date']">
                                                     <div class="input-group-prepend">
                                                         <div class="input-group-text">
-                                                            <input type="checkbox" id="use_due_date" name="use_due_date" data-target="#due_date" data-toggle="tooltip" data-placement="top" title="Check to use due date">
+                                                            <input type="checkbox" id="use_due_date" name="use_due_date" data-target="#due_date" data-toggle="tooltip" data-placement="top" title="Check to use due date" {{ !empty($data->due_date) ? 'checked' : '' }}>
                                                         </div>
                                                     </div>
-                                                    <input type="text" class="form-control datetimepicker-input" data-target="#due_date" name="due_date" value="{{ now()->format(config('setting.local.backend_date_format')) }}" disabled />
+                                                    <input type="text" class="form-control datetimepicker-input" data-target="#due_date" name="due_date" value="{{ app()->general->dateFormat($data->due_date) }}" {{ !empty($data->due_date) ? '' : 'disabled' }} />
                                                     <div class="input-group-append" data-target="#due_date" data-toggle="datetimepicker">
                                                         <div class="input-group-text">
                                                             <i class="fa fa-calendar"></i>
@@ -82,7 +76,7 @@
                                                 <select class="form-control font-weight-normal form-select2" id="category" name="category" data-allow-clear="false">
                                                     <option value=""></option>
                                                     @foreach ($categories as $category)
-                                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                                        <option value="{{ $category->id }}"{{ $data->category_id === $category->id ? ' selected' : '' }}>{{ $category->name }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -98,8 +92,8 @@
                                             <div class="form-group fv-row">
                                                 <label class="form-label font-weight-normal mb-1">Lock After Submit <span class="text-danger">*</span></label>
                                                 <select class="form-control font-weight-normal form-select2" id="is_locked" name="is_locked" data-hide-search="true" data-allow-clear="false">
-                                                    <option value="false">No</option>
-                                                    <option value="true">Yes</option>
+                                                    <option value="false"{{ !$data->is_locked ? ' selected' : '' }}>No</option>
+                                                    <option value="true"{{ $data->is_locked ? ' selected' : '' }}>Yes</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -108,15 +102,15 @@
                                         <div class="col-md-12">
                                             <div class="form-group fv-row">
                                                 <label class="form-label font-weight-normal mb-1">Notes </label>
-                                                <textarea id="notes" name="notes" class="form-control font-weight-normal" placeholder="Notes" maxlength="255" rows="3"></textarea>
+                                                <textarea id="notes" name="notes" class="form-control font-weight-normal" placeholder="Notes" maxlength="255" rows="3">{{ $data->notes }}</textarea>
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group fv-row">
                                                 <label class="form-label font-weight-normal mb-1">Public <span class="text-danger">*</span></label>
                                                 <select class="form-control font-weight-normal form-select2" id="is_public" name="is_public" data-hide-search="true" data-allow-clear="false">
-                                                    <option value="false">No</option>
-                                                    <option value="true">Yes</option>
+                                                    <option value="false"{{ !$data->is_public ? ' selected' : '' }}>No</option>
+                                                    <option value="true"{{ $data->is_public ? ' selected' : '' }}>Yes</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -362,5 +356,6 @@
 
     <script>
         const cancelURL = "{{ route('documents.list') }}";
+        const categorySubId = "{{ $data->category_sub_id }}";
     </script>
 </x-layouts.admin>

@@ -11,5 +11,9 @@ class DocumentAcknowledgeUserData extends Data
         public string $name,
         public string $email,
         public int $order,
-    ) {}
+        public bool $is_acknowledged = false,
+        public ?string $remarks = null,
+    ) {
+        $this->remarks = null;
+    }
 }

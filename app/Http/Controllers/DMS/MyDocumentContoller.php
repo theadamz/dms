@@ -8,6 +8,7 @@ use App\Helpers\GeneralHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DMS\DocumentCreateRequest;
 use App\Models\Basic\Category;
+use App\Models\DMS\Document;
 use App\Services\DocumentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -173,6 +174,12 @@ class MyDocumentContoller extends Controller
 
     public function edit(string $id)
     {
+        // check if document is allowed to edit
+        $status = Document::where('id', $id)->value('status');
+        if (!DocumentStatus::tryFrom($status)->isEditable()) {
+            abort(Response::HTTP_FORBIDDEN, 'Cannot edit document');
+        }
+
         // vendor js
         GeneralHelper::addAdditionalVendorJS([
             url('assets/vendor/plugins/sortable/Sortable.min.js'),
@@ -184,12 +191,26 @@ class MyDocumentContoller extends Controller
             'resources/js/pages/dms/my-document/edit.js'
         ]);
 
+        // get data
+        $data = $this->service->view(id: $id, userId: Auth::id());
+
+        // add breadcrumb
+        GeneralHelper::addAdditionalBreadCrumb([$data->doc_no, 'Edit']);
+
+        // remove breadcrumb
+        GeneralHelper::removeBreadCrumb(['List']);
+
         // approval type
         $workflowTypes = WorkflowType::cases();
 
         // get categories
         $categories = Category::where('is_active', true)->get(['id', 'name']);
 
-        return view('dms.my-document.edit')->with(compact('workflowTypes', 'categories'));
+        return view('dms.my-document.edit')->with(compact('workflowTypes', 'categories', 'data'));
+    }
+
+    public function update(string $id)
+    {
+        dd($id);
     }
 }

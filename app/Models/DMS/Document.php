@@ -59,26 +59,26 @@ class Document extends Model
 
     public function doc_parent(): BelongsTo
     {
-        return $this->belongsTo(self::class, 'ref_doc_id');
+        return $this->belongsTo(Document::class, 'ref_doc_id');
     }
 
-    public function files(): HasMany
+    public function document_files(): HasMany
     {
         return $this->hasMany(DocumentFile::class);
     }
 
-    public function approval_users(): HasMany
+    public function document_approvals(): HasManyThrough
     {
-        return $this->hasMany(DocumentApproval::class);
+        return $this->HasManyThrough(DocumentApproval::class, DocumentFile::class, 'document_id', 'document_file_id', 'id', 'id');
     }
 
-    public function review_users(): HasManyThrough
+    public function document_reviews(): HasManyThrough
     {
         return $this->hasManyThrough(DocumentReview::class, DocumentFile::class);
     }
 
-    public function acknowledge_users(): HasManyThrough
+    public function document_acknowledges(): HasManyThrough
     {
-        return $this->hasManyThrough(DocumentReview::class, DocumentAcknowledge::class);
+        return $this->hasManyThrough(DocumentAcknowledge::class, DocumentFile::class);
     }
 }

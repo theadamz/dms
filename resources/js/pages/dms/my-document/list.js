@@ -231,9 +231,6 @@ function initDataTable() {
     // DataTable refresh
     document.querySelector('#refresh').addEventListener('click', () => reloadDataTable(false));
 
-    // DataTable refresh
-    document.querySelector('#refresh').addEventListener('click', () => reloadDataTable(false));
-
     // DataTable filter
     document.querySelector('#filterReset').addEventListener('click', formFilterReset);
     document.querySelector('#formFilter').addEventListener('submit', (e) => {

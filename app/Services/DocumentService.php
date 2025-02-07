@@ -6,9 +6,15 @@ use App\Data\DMS\DocumentApprovalUserData;
 use App\Data\DMS\DocumentCreateData;
 use App\Data\DMS\DocumentData;
 use App\Data\DMS\DocumentFileCreateData;
+use App\Data\DMS\DocumentViewData;
 use App\Enums\DocumentStatus;
 use App\Enums\WorkflowType;
 use App\Exceptions\CustomException;
+use App\Models\DMS\Document;
+use App\Models\DMS\DocumentAcknowledge;
+use App\Models\DMS\DocumentApproval;
+use App\Models\DMS\DocumentFile;
+use App\Models\DMS\DocumentReview;
 use App\Models\DMS\DocumentSequence;
 use App\Repositories\Contracts\DocumentRepository;
 use DateTime;
@@ -80,6 +86,32 @@ class DocumentService
         }
 
         return $documentFiles;
+    }
+
+    private function isUserAuthorizeView(string $documentId, string $userId): bool
+    {
+        // get data is_public and owner_id
+        $doc = Document::where('id', $documentId)->first(['owner_id', 'is_public']);
+
+        // if $userId is the owner
+        if ($doc->owner_id === $userId) return true;
+
+        // check if document is for public
+        if ($doc->is_public) return true;
+
+        // get file ids
+        $fileIds = DocumentFile::where("document_id", $documentId)->pluck('id');
+
+        // check if user_id has to approve document files
+        if (DocumentApproval::where('user_id', $userId)->whereIn('document_file_id', $fileIds)->exists()) return true;
+
+        // check if user_id has review document files
+        if (DocumentReview::where('user_id', $userId)->whereIn('document_file_id', $fileIds)->exists()) return true;
+
+        // check if user_id has acknowledge document files
+        if (DocumentAcknowledge::where('user_id', $userId)->whereIn('document_file_id', $fileIds)->exists()) return true;
+
+        return false;
     }
 
     public function store(
@@ -165,5 +197,20 @@ class DocumentService
                 "message" => $e->getMessage(),
             ], Response::HTTP_INTERNAL_SERVER_ERROR));
         }
+    }
+
+    public function view(string $id, string $userId): DocumentViewData
+    {
+        // check if data exist
+        if (!Document::where('id', $id)->exists()) {
+            abort(Response::HTTP_NOT_FOUND, 'Document not fond');
+        }
+
+        // check if user authothorize to view
+        if (!$this->isUserAuthorizeView($id, $userId)) {
+            abort(Response::HTTP_FORBIDDEN, 'Document is forbidden');
+        }
+
+        return $this->repository->view(id: $id);
     }
 }

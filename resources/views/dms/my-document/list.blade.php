@@ -60,15 +60,15 @@
                                     <th colspan="3" class="text-center">Review</th>
                                     <th colspan="3" class="text-center">Acknowledge</th>
                                     <th rowspan="2" class="align-middle">Locked</th>
-                                    <th rowspan="2" class="align-middle">For Public</th>
+                                    <th rowspan="2" class="align-middle">Public</th>
                                     <th rowspan="2" class="align-middle text-center">Status</th>
                                 </tr>
                                 <tr>
-                                    <th class="border-top-0">Is Required</th>
-                                    <th class="border-top-0">Workflow Type</th>
+                                    <th class="border-top-0">Required</th>
+                                    <th class="border-top-0">Workflow</th>
                                     <th class="border-top-0">Reviewed</th>
-                                    <th class="border-top-0">Is Required</th>
-                                    <th class="border-top-0">Workflow Type</th>
+                                    <th class="border-top-0">Required</th>
+                                    <th class="border-top-0">Workflow</th>
                                     <th class="border-top-0">Acknowledged</th>
                                 </tr>
                             </thead>

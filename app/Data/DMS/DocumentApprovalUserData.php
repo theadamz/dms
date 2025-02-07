@@ -11,5 +11,9 @@ class DocumentApprovalUserData extends Data
         public string $name,
         public string $email,
         public int $order,
-    ) {}
+        public bool $is_approved = false,
+        public ?string $remarks = null,
+    ) {
+        $this->remarks = null;
+    }
 }

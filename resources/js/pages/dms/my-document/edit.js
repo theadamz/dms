@@ -224,6 +224,9 @@ function initActions() {
     approvalWorkflowRender();
     reviewWorkflowRender();
     acknowledgementWorkflowRender();
+
+    // get initial option
+    fillOptionsFromAjax("#category_sub", `${_baseURL}/options/basics/category-subs?category=${$('#category').val()}`, categorySubId);
 }
 
 async function saveData() {

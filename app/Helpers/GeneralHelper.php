@@ -24,6 +24,7 @@ class GeneralHelper
     protected static array $additionalVendorJS = [];
     protected static array $additionalVendorCSS = [];
     protected static array $additionalBreadCrumb = [];
+    protected static array $breadCrumbToRemove = [];
     protected static ?string $id = null;
     protected static string $action = 'create';
     protected static ?string $title = null;
@@ -123,6 +124,11 @@ class GeneralHelper
     public static function addAdditionalBreadCrumb(array $data): void
     {
         self::$additionalBreadCrumb = array_merge(self::$additionalBreadCrumb, $data);
+    }
+
+    public static function removeBreadCrumb(array $data): void
+    {
+        self::$breadCrumbToRemove = array_merge(self::$breadCrumbToRemove, $data);
     }
 
     public static function getTimezone(): array
@@ -269,6 +275,13 @@ class GeneralHelper
         // get data breadcrumb
         $dataBreadcrumbs = self::getBreadCrumbData($menuData, $menuCode);
 
+        // breadcrumb to remove
+        $dataBreadcrumbs = array_filter($dataBreadcrumbs, function ($item) {
+            if (!in_array($item['name'], self::$breadCrumbToRemove)) {
+                return $item;
+            }
+        });
+
         // loop
         foreach ($dataBreadcrumbs as $index => $breadcrumb) {
             // if index = 0
@@ -282,6 +295,13 @@ class GeneralHelper
             $html .= '<li class="list-inline-item"><i class="fas fa-chevron-right text-xs"></i></li>';
             $html .= '<li class="list-inline-item">' . $breadcrumb['name'] . '</li>';
         }
+
+        // breadcrumb to remove
+        self::$additionalBreadCrumb = array_filter(self::$additionalBreadCrumb, function ($item) {
+            if (!in_array($item, self::$breadCrumbToRemove)) {
+                return $item;
+            }
+        });
 
         foreach (self::$additionalBreadCrumb as $index => $breadcrumb) {
             if (!empty($dataBreadcrumbs) || $index > 0) {

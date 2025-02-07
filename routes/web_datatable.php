@@ -21,5 +21,6 @@ Route::prefix('/basics')->group(function () {
 
 // dms
 Route::prefix('/documents')->group(function () {
+    Route::get('/', [\App\Http\Controllers\DMS\DocumentController::class, 'datatable'])->name('dt.documents');
     Route::get('/list', [\App\Http\Controllers\DMS\MyDocumentContoller::class, 'datatable'])->name('dt.documents.list');
 });

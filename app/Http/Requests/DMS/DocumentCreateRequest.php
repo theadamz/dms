@@ -67,8 +67,10 @@ class DocumentCreateRequest extends FormRequest
             'is_public' => $this->has('is_public') ? filter_var($this->post('is_public'), FILTER_VALIDATE_BOOLEAN) : false,
             'approval_users' => str($this->post('approval_users'))->isJson() ? json_decode($this->post('approval_users'), true) : null,
             'is_review_required' => $this->has('is_review_required') ? filter_var($this->post('is_review_required'), FILTER_VALIDATE_BOOLEAN) : false,
+            'review_workflow_type' => $this->filled('review_workflow_type') ? $this->post('review_workflow_type') : WorkflowType::INORDER->value,
             'review_users' => str($this->post('review_users'))->isJson() ? json_decode($this->post('review_users'), true) : null,
             'is_acknowledgement_required' => $this->has('is_acknowledgement_required') ? filter_var($this->post('is_acknowledgement_required'), FILTER_VALIDATE_BOOLEAN) : false,
+            'acknowledgement_workflow_type' => $this->filled('acknowledgement_workflow_type') ? $this->post('acknowledgement_workflow_type') : WorkflowType::INORDER->value,
             'acknowledgement_users' => str($this->post('acknowledgement_users'))->isJson() ? json_decode($this->post('acknowledgement_users'), true) : null,
         ]);
     }

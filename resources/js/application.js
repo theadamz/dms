@@ -144,7 +144,7 @@ export const select2TemplateOptions = {
 }
 
 export const components = {
-    cardDocumentFile: (item) => {
+    cardDocumentFile: (item, showRemoveButton = true) => {
         return `<div class="d-flex flex-grow-1 justify-content-between align-items-start">
                     <div>
                         <span class="text-muted font-weight-normal">${item.file_name}</span>
@@ -153,9 +153,12 @@ export const components = {
                             <span class="badge badge-info">${formatBytes(item.file_size, 1)}</span>
                         </div>
                     </div>
-                    <button type="button" class="btn p-0 document-file-remove" title="Remove ${item.file_name}" data-id="${item.id ?? ''}" data-name="${item.file_name}">
-                        <i class="fas fa-times text-danger"></i>
-                    </button>
+                    ${
+                        showRemoveButton ?
+                        `<button type="button" class="btn p-0 document-file-remove" title="Remove ${item.file_name}" data-id="${item.id ?? ''}" data-name="${item.file_name}">
+                            <i class="fas fa-times text-danger"></i>
+                        </button>` : ''
+                    }
                 </div>`;
     }
 };

@@ -62,7 +62,7 @@ return [
             'name' => 'My Acknowledge',
             'description' => 'My Review - Parent',
             'path' => null,
-            'icon' => 'fas fa-search',
+            'icon' => 'far fa-check-circle',
             'visible' => true,
             'children' => [
                 ['group_code' => 'main', 'parent_menu_code' => 'my-review', 'code' => 'my-acknowledge-wait', 'name' => 'Waiting', 'description' => 'List waiting for acknowledgement', 'path' => '/documents/acknowledge/waiting', 'icon' => 'fas fa-hourglass-half', 'visible' => true,  'children' => null],
@@ -101,6 +101,11 @@ return [
         ['code' => 'my-doc', 'name' => 'Menu Parent My Documents', 'permissions' => ['access']],
         ['code' => 'my-doc-new', 'name' => 'Menu My Documents - New', 'permissions' => ['access']],
         ['code' => 'my-doc-list', 'name' => 'Menu My Documents - List', 'permissions' => ['access']],
+
+        /* My Review */
+        ['code' => 'my-review', 'name' => 'Menu Parent My Review', 'permissions' => ['access']],
+        ['code' => 'my-review-wait', 'name' => 'My Review - Waiting', 'permissions' => ['access']],
+        ['code' => 'my-review-list', 'name' => 'My Review - List', 'permissions' => ['access']],
 
         /* My Approval */
         ['code' => 'my-approval', 'name' => 'Menu Parent My Approval', 'permissions' => ['access']],

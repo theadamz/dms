@@ -4,7 +4,7 @@ namespace App\Models\DMS;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Facades\Auth;
 
 class DocumentFile extends Model
@@ -26,18 +26,18 @@ class DocumentFile extends Model
         });
     }
 
-    public function document_approvals(): HasMany
+    public function document_approvals(): HasManyThrough
     {
-        return $this->hasMany(DocumentApproval::class);
+        return $this->HasManyThrough(DocumentApproval::class, Document::class);
     }
 
-    public function document_reviews(): HasMany
+    public function document_reviews(): HasManyThrough
     {
-        return $this->hasMany(DocumentReview::class);
+        return $this->HasManyThrough(DocumentReview::class, Document::class);
     }
 
-    public function document_acknowledges(): HasMany
+    public function document_acknowledges(): HasManyThrough
     {
-        return $this->hasMany(DocumentAcknowledge::class);
+        return $this->HasManyThrough(DocumentAcknowledge::class, Document::class);
     }
 }

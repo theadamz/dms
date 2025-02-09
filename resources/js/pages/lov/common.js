@@ -1,7 +1,7 @@
 import {
     initDataTableSearch,
     initDragableModal
-} from '../../general';
+} from '../../../js/general';
 
 function closeModal() {
     $('#_table_data_lov tbody').off('dblclick');
@@ -99,7 +99,7 @@ function reloadDataTableLOV(resetPaging = true) {
     _dataTableLOV.ajax.reload(null, resetPaging);
 }
 
-export function initPage() {
+export function lovCommonInitialize() {
     initDragableModal('#_modal_lov');
     createHeaderTable(DT_headers);
     initDataTableLOV();

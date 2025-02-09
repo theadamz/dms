@@ -124,37 +124,79 @@
                                 </div>
                             </div>
                             <!-- ./ general information -->
-                        </div>
-                        <div class="col-md-4">
-                            <!-- document files -->
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="card-title">Document Files <span class="text-danger">*</span></h5>
-                                    <div class="card-tools">
-                                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                            <i class="fas fa-minus"></i>
-                                        </button>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <!-- document files -->
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="card-title">Document Files <span class="text-danger">*</span></h5>
+                                            <div class="card-tools">
+                                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="card-body py-3 px-3">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <button type="button" class="btn btn-primary btn-sm" id="addFiles" name="addFiles">Add Files</button>
+                                                    <input type="file" id="attachments" name="attachments" class="d-none ignore" multiple accept="{{ '.' . join(', .', array_merge(config('setting.other.file_doc_attachment_allowed'), config('setting.other.file_img_allowed'))) }}" />
+                                                </div>
+                                                <div class="col-md-12 border-top my-3"></div>
+                                                <div class="col-md-12" id="documentFilesContainer">
+                                                    <!-- list of files -->
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
+                                    <!-- ./ document files -->
                                 </div>
-                                <div class="card-body py-3 px-3">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <button type="button" class="btn btn-primary btn-sm" id="addFiles" name="addFiles">Add Files</button>
-                                            <input type="file" id="files" name="files" class="d-none ignore" multiple accept="{{ '.' . join(', .', array_merge(config('setting.other.file_doc_attachment_allowed'), config('setting.other.file_img_allowed'))) }}" />
+                                <div class="col-md-6">
+                                    <!-- approval workflow -->
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="card-title">Approval Workflow <span class="text-danger">*</span></h5>
+                                            <div class="card-tools">
+                                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div class="col-md-12 border-top my-3"></div>
-                                        <div class="col-md-12" id="documentFilesContainer">
-                                            <!-- list of files -->
+                                        <div class="card-body py-3 px-3">
+                                            <div class="row">
+                                                <div class="form-group fv-row col-md-12">
+                                                    <select class="form-control font-weight-normal form-select2" id="approval_workflow_type" name="approval_workflow_type" data-placeholder="Workflow Type" data-hide-search="true" data-allow-clear="false">
+                                                        <option value=""></option>
+                                                        @foreach ($workflowTypes as $workflowType)
+                                                            <option value="{{ $workflowType->value }}">{{ $workflowType->getLabel() }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6 mb-3 mb-md-0">
+                                                    <button type="button" class="btn btn-primary btn-sm btn-block" id="addApprovalUsers" name="addApprovalUsers">Add Users</button>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <button type="button" class="btn btn-info btn-sm btn-block" id="addApprovalUsersSet" name="addApprovalUsersSet">Add Approval Set</button>
+                                                </div>
+                                                <div class="col-md-12 border-top my-3"></div>
+                                                <div class="col-md-12">
+                                                    <div class="list-group" id="approvalWorkflowContainer">
+                                                        <!-- list of users with order -->
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
+                                    <!-- ./ approval workflow -->
                                 </div>
                             </div>
-                            <!-- ./ document files -->
-
-                            <!-- approval workflow -->
+                        </div>
+                        <div class="col-md-4">
+                            <!-- informed user -->
                             <div class="card">
                                 <div class="card-header">
-                                    <h5 class="card-title">Approval Workflow <span class="text-danger">*</span></h5>
+                                    <h5 class="card-title">Informed Users</h5>
                                     <div class="card-tools">
                                         <button type="button" class="btn btn-tool" data-card-widget="collapse">
                                             <i class="fas fa-minus"></i>
@@ -163,32 +205,22 @@
                                 </div>
                                 <div class="card-body py-3 px-3">
                                     <div class="row">
-                                        <div class="form-group fv-row col-md-12">
-                                            <select class="form-control font-weight-normal form-select2" id="approval_workflow_type" name="approval_workflow_type" data-placeholder="Workflow Type" data-hide-search="true" data-allow-clear="false">
-                                                <option value=""></option>
-                                                @foreach ($workflowTypes as $workflowType)
-                                                    <option value="{{ $workflowType->value }}">{{ $workflowType->getLabel() }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
                                         <div class="col-md-6 mb-3 mb-md-0">
-                                            <button type="button" class="btn btn-primary btn-sm btn-block" id="addApprovalUsers" name="addApprovalUsers">Add Users</button>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <button type="button" class="btn btn-info btn-sm btn-block" id="addApprovalUsersSet" name="addApprovalUsersSet">Add Approval Set</button>
+                                            <button type="button" class="btn btn-primary btn-sm btn-block" id="addInformedUsers" name="addInformedUsers">Add Users</button>
                                         </div>
                                         <div class="col-md-12 border-top my-3"></div>
                                         <div class="col-md-12">
-                                            <div class="list-group col" id="approvalWorkflowContainer">
+                                            <div class="list-group" id="informedUsersContainer">
                                                 <!-- list of users with order -->
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <!-- ./ approval workflow -->
+                            <!-- ./ informed user -->
 
                             <!-- review workflow -->
+                            <button type="button" class="btn btn-secondary btn-block mb-3" id="addReviewWorkFlow" name="addReviewWorkFlow">Add Review Workflow</button>
                             <div class="d-none" id="reviewWorkflowCard">
                                 <div class="card">
                                     <div class="card-header">
@@ -220,7 +252,7 @@
                                             </div>
                                             <div class="col-md-12 border-top my-3"></div>
                                             <div class="col-md-12">
-                                                <div class="list-group col" id="reviewWorkflowContainer">
+                                                <div class="list-group" id="reviewWorkflowContainer">
                                                     <!-- list of users with order -->
                                                 </div>
                                             </div>
@@ -231,6 +263,7 @@
                             <!-- ./ review workflow -->
 
                             <!-- acknowledgement workflow -->
+                            <button type="button" class="btn btn-secondary btn-block mb-3" id="addAcknowledgementWorkFlow" name="addAcknowledgementWorkFlow">Add Acknowledgement Workflow</button>
                             <div class="d-none" id="acknowledgementWorkflowCard">
                                 <div class="card">
                                     <div class="card-header">
@@ -262,7 +295,7 @@
                                             </div>
                                             <div class="col-md-12 border-top my-3"></div>
                                             <div class="col-md-12">
-                                                <div class="list-group col" id="acknowledgementWorkflowContainer">
+                                                <div class="list-group" id="acknowledgementWorkflowContainer">
                                                     <!-- list of users with order -->
                                                 </div>
                                             </div>
@@ -271,9 +304,6 @@
                                 </div>
                             </div>
                             <!-- ./ acknowledgement workflow -->
-
-                            <button type="button" class="btn btn-secondary btn-block" id="addReviewWorkFlow" name="addReviewWorkFlow">Add Review Workflow</button>
-                            <button type="button" class="btn btn-secondary btn-block" id="addAcknowledgementWorkFlow" name="addAcknowledgementWorkFlow">Add Acknowledgement Workflow</button>
                         </div>
                     </div>
                 </form>
@@ -288,7 +318,7 @@
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content position-absolute">
                 <div class="modal-header align-items-center">
-                    <h4 class="modal-title">Add Users Workflow</h4>
+                    <h4 class="modal-title">Add Users</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>

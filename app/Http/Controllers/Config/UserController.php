@@ -27,7 +27,6 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Vite;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
@@ -387,7 +386,7 @@ class UserController extends Controller
         ];
         $data['columnDefinitions'] = [];
         $data['columnOrders'] = [];
-        $data['jsFile'] = Vite::asset('resources/js/pages/lov/common.js');
+        $data['jsFile'] = 'resources/js/pages/lov/common.js';
 
         return view('lov.common')->with(compact('data'));
     }

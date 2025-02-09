@@ -36,6 +36,8 @@ class DocumentViewData extends Data
         public WorkflowType $approval_workflow_type,
         #[DataCollectionOf(DocumentApprovalUserData::class)]
         public DataCollection|Collection $approval_users,
+        #[DataCollectionOf(DocumentInformedUserData::class)]
+        public DataCollection|Collection $informed_users,
         #[WithCast(EnumCast::class)]
         public WorkflowType $review_workflow_type,
         public bool $is_review_required,

@@ -18,12 +18,15 @@ return new class extends Migration
             $table->string('file_name', 50)->unique();
             $table->bigInteger('file_size')->comment('in bytes');
             $table->string('file_ext', 50);
-            $table->string('file_mime', 100);
+            $table->string('file_type', 100);
             $table->uuid('created_by')->index();
             $table->timestamp('created_at')->index();
 
+            // unique
+            $table->unique(['document_id', 'file_name']);
+
             // FK
-            $table->foreign('document_id')->references('id')->on('documents')->restrictOnDelete()->cascadeOnUpdate();
+            $table->foreign('document_id')->references('id')->on('documents')->cascadeOnDelete()->cascadeOnUpdate();
         });
     }
 

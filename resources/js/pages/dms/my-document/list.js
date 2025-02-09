@@ -85,6 +85,9 @@ function initDataTable() {
             {
                 "data": "doc_no",
                 "name": "d.doc_no",
+                "render": function (data, type, row, meta) {
+                    return `<a href="${_baseURL}/documents/list/${row.id}/view">${data}</a>`;
+                }
             },
             {
                 "data": "date",

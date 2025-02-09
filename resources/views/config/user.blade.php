@@ -258,4 +258,8 @@
         </div>
     </div>
     <!--end::Modal - Form Filter-->
+
+    <script>
+        const timezone = "{{ session('timezone') }}";
+    </script>
 </x-layouts.admin>

@@ -5,6 +5,9 @@ import {
     MsgBox,
     refactorErrorMessages
 } from "./general.js";
+import {
+    lovCommonInitialize
+} from "./pages/lov/common.js";
 
 export async function clearCache() {
     const confirmation = await MsgBox.Confirm('clear cache?').catch(err => {
@@ -147,7 +150,7 @@ export const components = {
     cardDocumentFile: (item, showRemoveButton = true) => {
         return `<div class="d-flex flex-grow-1 justify-content-between align-items-start">
                     <div>
-                        <span class="text-muted font-weight-normal">${item.file_name}</span>
+                        <span class="text-muted font-weight-normal">${item.file_origin_name}</span>
                         <div class="d-flex text-muted mt-1">
                             <span class="badge badge-primary mr-2">${item.file_type}</span>
                             <span class="badge badge-info">${formatBytes(item.file_size, 1)}</span>
@@ -155,10 +158,93 @@ export const components = {
                     </div>
                     ${
                         showRemoveButton ?
-                        `<button type="button" class="btn p-0 document-file-remove" title="Remove ${item.file_name}" data-id="${item.id ?? ''}" data-name="${item.file_name}">
+                        `<button type="button" class="btn p-0 document-file-remove" title="Remove ${item.file_origin_name}" data-id="${item.id ?? ''}" data-name="${item.file_origin_name}">
                             <i class="fas fa-times text-danger"></i>
                         </button>` : ''
                     }
                 </div>`;
     }
 };
+
+
+export const lovCommon = {
+    data: {},
+    init: ({
+        url,
+        buttonOpenLOVElement = 'LOV',
+        buttonClearLOVElement = null,
+        hiddenElement,
+        captionElement,
+        descriptionElement = null,
+        dependencyElement = null,
+        hiddenColumnName = 'id',
+        captionColumnName = 'name',
+        descriptionColumnName = 'description',
+        modalSize = 'modal-lg'
+    }) => {
+        document.querySelector(`${buttonOpenLOVElement}`).addEventListener('click', function () {
+            if (dependencyElement) {
+                if (!$(`${dependencyElement}`).val()) return;
+            }
+
+            lovCommon.load({
+                url: url,
+                hiddenElement: hiddenElement,
+                captionElement: captionElement,
+                descriptionElement: descriptionElement,
+                hiddenColumnName: hiddenColumnName,
+                captionColumnName: captionColumnName,
+                descriptionColumnName: descriptionColumnName,
+                modalSize: modalSize
+            });
+        });
+
+        if (buttonClearLOVElement) {
+            document.querySelector(`${buttonClearLOVElement}`).addEventListener('click', function () {
+                lovCommon.clearElements();
+            });
+        }
+    },
+    load: ({
+        url,
+        hiddenElement,
+        captionElement,
+        descriptionElement = null,
+        hiddenColumnName = 'id',
+        captionColumnName = 'name',
+        descriptionColumnName = 'description',
+        modalSize = 'modal-lg'
+    }) => {
+        loadingProcess();
+        $('#_dynamic_content').load(`${url}`, () => {
+            loadingProcess(false);
+            $('#_modal_lov').modal('show');
+            $(".modal-dialog").addClass(`${modalSize}`);
+            lovCommonInitialize();
+
+            $('#_modal_lov').on('hide.bs.modal', function () {
+                if ($resultFromLOV.result) {
+                    if (lovCommon.data[hiddenColumnName] == $resultFromLOV.data[hiddenColumnName]) return;
+                    lovCommon.data[hiddenColumnName] = $resultFromLOV.data[hiddenColumnName];
+
+                    $(`${hiddenElement}`).val($resultFromLOV.data[hiddenColumnName]);
+                    $(`${captionElement}`).val($resultFromLOV.data[captionColumnName]);
+                    if (descriptionElement) {
+                        $(`${descriptionElement}`).text($resultFromLOV.data[descriptionColumnName]);
+                    }
+                }
+            });
+        });
+    },
+    clearElements: ({
+        hiddenElement,
+        captionElement,
+        descriptionElement
+    }) => {
+        $(`${hiddenElement}`).val(null)
+        $(`${captionElement}`).val(null);
+        if (descriptionElement) {
+            $(`${descriptionElement}`).text(null);
+        }
+    }
+}

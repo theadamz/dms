@@ -12,6 +12,13 @@
                         </a>
                     </li>
                 @endcan
+                <div class="border-left text-center mx-2">&nbsp;</div>
+                <li class="nav-item mr-2">
+                    <button type="button" class="btn btn-sm btn-outline-info" id="reload" name="reload">
+                        <i class="fas fa-sync-alt d-inline"></i>
+                        <span class="ml-2 d-none d-sm-inline font-weight-bold">Reload</span>
+                    </button>
+                </li>
             </ul>
 
             <!-- Right -->
@@ -34,7 +41,7 @@
     <section class="content">
         <section class="flex-column-fluid">
             <div class="container-fluid">
-                <form id="formInput" name="formInput" class="form" method="POST" action="{{ route('documents.edit', ['id' => $data->id]) }}" enctype="multipart/form-data">
+                <form id="formInput" name="formInput" class="form" method="POST" action="{{ route('documents.update', ['id' => $data->id]) }}" enctype="multipart/form-data">
                     @method('put')
                     @csrf
                     <div class="row">
@@ -50,7 +57,7 @@
                                             <x-inputs.textbox label="Owner" element-name="owner_name" addClass="ignore" :readonly="true" value="{{ $data->owner_name }} - {{ $data->department_name }}" />
                                         </div>
                                         <div class="col-md-4">
-                                            <x-inputs.textbox label="Date" element-name="date" addClass="ignore" :readonly="true" value="{{ app()->general->dateFormat($data->date) }}" />
+                                            <x-inputs.textbox label="Date" element-name="date" addClass="ignore" :readonly="true" value="{{ empty($data->date) ? '' : app()->general->dateFormat($data->date) }}" />
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group fv-row">
@@ -61,7 +68,7 @@
                                                             <input type="checkbox" id="use_due_date" name="use_due_date" data-target="#due_date" data-toggle="tooltip" data-placement="top" title="Check to use due date" {{ !empty($data->due_date) ? 'checked' : '' }}>
                                                         </div>
                                                     </div>
-                                                    <input type="text" class="form-control datetimepicker-input" data-target="#due_date" name="due_date" value="{{ app()->general->dateFormat($data->due_date) }}" {{ !empty($data->due_date) ? '' : 'disabled' }} />
+                                                    <input type="text" class="form-control datetimepicker-input" data-target="#due_date" name="due_date" value="{{ empty($data->date) ? '' : app()->general->dateFormat($data->date) }}" {{ !empty($data->due_date) ? '' : 'disabled' }} />
                                                     <div class="input-group-append" data-target="#due_date" data-toggle="datetimepicker">
                                                         <div class="input-group-text">
                                                             <i class="fa fa-calendar"></i>
@@ -118,37 +125,79 @@
                                 </div>
                             </div>
                             <!-- ./ general information -->
-                        </div>
-                        <div class="col-md-4">
-                            <!-- document files -->
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="card-title">Document Files <span class="text-danger">*</span></h5>
-                                    <div class="card-tools">
-                                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                            <i class="fas fa-minus"></i>
-                                        </button>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <!-- document files -->
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="card-title">Document Files <span class="text-danger">*</span></h5>
+                                            <div class="card-tools">
+                                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="card-body py-3 px-3">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <button type="button" class="btn btn-primary btn-sm" id="addFiles" name="addFiles">Add Files</button>
+                                                    <input type="file" id="attachments" name="attachments" class="d-none ignore" multiple accept="{{ '.' . join(', .', array_merge(config('setting.other.file_doc_attachment_allowed'), config('setting.other.file_img_allowed'))) }}" />
+                                                </div>
+                                                <div class="col-md-12 border-top my-3"></div>
+                                                <div class="col-md-12" id="documentFilesContainer">
+                                                    <!-- list of files -->
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
+                                    <!-- ./ document files -->
                                 </div>
-                                <div class="card-body py-3 px-3">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <button type="button" class="btn btn-primary btn-sm" id="addFiles" name="addFiles">Add Files</button>
-                                            <input type="file" id="files" name="files" class="d-none ignore" multiple accept="{{ '.' . join(', .', array_merge(config('setting.other.file_doc_attachment_allowed'), config('setting.other.file_img_allowed'))) }}" />
+                                <div class="col-md-6">
+                                    <!-- approval workflow -->
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="card-title">Approval Workflow <span class="text-danger">*</span></h5>
+                                            <div class="card-tools">
+                                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div class="col-md-12 border-top my-3"></div>
-                                        <div class="col-md-12" id="documentFilesContainer">
-                                            <!-- list of files -->
+                                        <div class="card-body py-3 px-3">
+                                            <div class="row">
+                                                <div class="form-group fv-row col-md-12">
+                                                    <select class="form-control font-weight-normal form-select2" id="approval_workflow_type" name="approval_workflow_type" data-placeholder="Workflow Type" data-hide-search="true" data-allow-clear="false">
+                                                        <option value=""></option>
+                                                        @foreach ($workflowTypes as $workflowType)
+                                                            <option value="{{ $workflowType->value }}"{{ $data->approval_workflow_type === $workflowType ? ' selected' : '' }}>{{ $workflowType->getLabel() }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6 mb-3 mb-md-0">
+                                                    <button type="button" class="btn btn-primary btn-sm btn-block" id="addApprovalUsers" name="addApprovalUsers">Add Users</button>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <button type="button" class="btn btn-info btn-sm btn-block" id="addApprovalUsersSet" name="addApprovalUsersSet">Add Approval Set</button>
+                                                </div>
+                                                <div class="col-md-12 border-top my-3"></div>
+                                                <div class="col-md-12">
+                                                    <div class="list-group" id="approvalWorkflowContainer">
+                                                        <!-- list of users with order -->
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
+                                    <!-- ./ approval workflow -->
                                 </div>
                             </div>
-                            <!-- ./ document files -->
-
-                            <!-- approval workflow -->
+                        </div>
+                        <div class="col-md-4">
+                            <!-- informed user -->
                             <div class="card">
                                 <div class="card-header">
-                                    <h5 class="card-title">Approval Workflow <span class="text-danger">*</span></h5>
+                                    <h5 class="card-title">Informed Users</h5>
                                     <div class="card-tools">
                                         <button type="button" class="btn btn-tool" data-card-widget="collapse">
                                             <i class="fas fa-minus"></i>
@@ -157,33 +206,23 @@
                                 </div>
                                 <div class="card-body py-3 px-3">
                                     <div class="row">
-                                        <div class="form-group fv-row col-md-12">
-                                            <select class="form-control font-weight-normal form-select2" id="approval_workflow_type" name="approval_workflow_type" data-placeholder="Workflow Type" data-hide-search="true" data-allow-clear="false">
-                                                <option value=""></option>
-                                                @foreach ($workflowTypes as $workflowType)
-                                                    <option value="{{ $workflowType->value }}">{{ $workflowType->getLabel() }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
                                         <div class="col-md-6 mb-3 mb-md-0">
-                                            <button type="button" class="btn btn-primary btn-sm btn-block" id="addApprovalUsers" name="addApprovalUsers">Add Users</button>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <button type="button" class="btn btn-info btn-sm btn-block" id="addApprovalUsersSet" name="addApprovalUsersSet">Add Approval Set</button>
+                                            <button type="button" class="btn btn-primary btn-sm btn-block" id="addInformedUsers" name="addInformedUsers">Add Users</button>
                                         </div>
                                         <div class="col-md-12 border-top my-3"></div>
                                         <div class="col-md-12">
-                                            <div class="list-group col" id="approvalWorkflowContainer">
+                                            <div class="list-group" id="informedUsersContainer">
                                                 <!-- list of users with order -->
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <!-- ./ approval workflow -->
+                            <!-- ./ informed user -->
 
                             <!-- review workflow -->
-                            <div class="d-none" id="reviewWorkflowCard">
+                            <button type="button" class="btn btn-secondary btn-block mb-3 {{ $data->is_review_required ? 'd-none' : '' }}" id="addReviewWorkFlow" name="addReviewWorkFlow">Add Review Workflow</button>
+                            <div class="{{ $data->is_review_required ? '' : 'd-none' }}" id="reviewWorkflowCard">
                                 <div class="card">
                                     <div class="card-header">
                                         <h5 class="card-title">Review Workflow</h5>
@@ -202,7 +241,7 @@
                                                 <select class="form-control font-weight-normal form-select2" id="review_workflow_type" name="review_workflow_type" data-placeholder="Workflow Type" data-hide-search="true" data-allow-clear="false">
                                                     <option value=""></option>
                                                     @foreach ($workflowTypes as $workflowType)
-                                                        <option value="{{ $workflowType->value }}">{{ $workflowType->getLabel() }}</option>
+                                                        <option value="{{ $workflowType->value }}"{{ $data->review_workflow_type === $workflowType ? ' selected' : '' }}>{{ $workflowType->getLabel() }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -214,7 +253,7 @@
                                             </div>
                                             <div class="col-md-12 border-top my-3"></div>
                                             <div class="col-md-12">
-                                                <div class="list-group col" id="reviewWorkflowContainer">
+                                                <div class="list-group" id="reviewWorkflowContainer">
                                                     <!-- list of users with order -->
                                                 </div>
                                             </div>
@@ -225,7 +264,8 @@
                             <!-- ./ review workflow -->
 
                             <!-- acknowledgement workflow -->
-                            <div class="d-none" id="acknowledgementWorkflowCard">
+                            <button type="button" class="btn btn-secondary btn-block mb-3 {{ $data->is_acknowledgement_required ? 'd-none' : '' }}" id="addAcknowledgementWorkFlow" name="addAcknowledgementWorkFlow">Add Acknowledgement Workflow</button>
+                            <div class="{{ $data->is_acknowledgement_required ? '' : 'd-none' }}" id="acknowledgementWorkflowCard">
                                 <div class="card">
                                     <div class="card-header">
                                         <h5 class="card-title">Acknowledgement Workflow</h5>
@@ -244,7 +284,7 @@
                                                 <select class="form-control font-weight-normal form-select2" id="acknowledgement_workflow_type" name="acknowledgement_workflow_type" data-placeholder="Workflow Type" data-hide-search="true" data-allow-clear="false">
                                                     <option value=""></option>
                                                     @foreach ($workflowTypes as $workflowType)
-                                                        <option value="{{ $workflowType->value }}">{{ $workflowType->getLabel() }}</option>
+                                                        <option value="{{ $workflowType->value }}"{{ $data->is_acknowledgement_required && $data->acknowledgement_workflow_type === $workflowType ? ' selected' : '' }}>{{ $workflowType->getLabel() }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -256,7 +296,7 @@
                                             </div>
                                             <div class="col-md-12 border-top my-3"></div>
                                             <div class="col-md-12">
-                                                <div class="list-group col" id="acknowledgementWorkflowContainer">
+                                                <div class="list-group" id="acknowledgementWorkflowContainer">
                                                     <!-- list of users with order -->
                                                 </div>
                                             </div>
@@ -265,9 +305,6 @@
                                 </div>
                             </div>
                             <!-- ./ acknowledgement workflow -->
-
-                            <button type="button" class="btn btn-secondary btn-block" id="addReviewWorkFlow" name="addReviewWorkFlow">Add Review Workflow</button>
-                            <button type="button" class="btn btn-secondary btn-block" id="addAcknowledgementWorkFlow" name="addAcknowledgementWorkFlow">Add Acknowledgement Workflow</button>
                         </div>
                     </div>
                 </form>
@@ -282,7 +319,7 @@
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content position-absolute">
                 <div class="modal-header align-items-center">
-                    <h4 class="modal-title">Add Users Workflow</h4>
+                    <h4 class="modal-title">Add Users</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -357,5 +394,15 @@
     <script>
         const cancelURL = "{{ route('documents.list') }}";
         const categorySubId = "{{ $data->category_sub_id }}";
+
+        // for inputs
+        let refDocId = "{{ $data->ref_doc_id }}";
+        let documentFiles = {{ Js::from($data->files) }};
+        let approvalUsers = {{ Js::from($data->approval_users) }};
+        let informedUsers = {{ Js::from($data->informed_users) }};
+        let isReviewRequired = {{ $data->is_review_required ? 'true' : 'false' }};
+        let reviewUsers = {{ Js::from($data->review_users ?? []) }};
+        let isAcknowledgementRequired = {{ $data->is_acknowledgement_required ? 'true' : 'false' }};
+        let acknowledgementUsers = {{ Js::from($data->acknowledge_users ?? []) }};
     </script>
 </x-layouts.admin>

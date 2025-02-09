@@ -21,9 +21,9 @@
             </div>
             <div class="modal-footer justify-content-between">
                 <button type="button" class="btn btn-default" data-dismiss="modal" id="_modal_button_close"><i
-                        class="fas fa-times mr-2"></i> Cancel</button>
+                       class="fas fa-times mr-2"></i> Cancel</button>
                 <button type="button" class="btn btn-primary" id="_modal_button_refresh"><i
-                        class="fas fa-sync mr-2"></i> Refresh</button>
+                       class="fas fa-sync mr-2"></i> Refresh</button>
             </div>
         </div>
     </div>
@@ -45,8 +45,4 @@
         data: null
     };
 </script>
-<script type="module">
-    import("{{ $data['jsFile'] }}").then(module => {
-        module.initPage();
-    });
-</script>
+@vite($data['jsFile']);

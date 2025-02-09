@@ -67,18 +67,23 @@ class Document extends Model
         return $this->hasMany(DocumentFile::class);
     }
 
-    public function document_approvals(): HasManyThrough
+    public function document_approvals(): HasMany
     {
-        return $this->HasManyThrough(DocumentApproval::class, DocumentFile::class, 'document_id', 'document_file_id', 'id', 'id');
+        return $this->HasMany(DocumentApproval::class);
     }
 
-    public function document_reviews(): HasManyThrough
+    public function document_informed_users(): HasMany
     {
-        return $this->hasManyThrough(DocumentReview::class, DocumentFile::class);
+        return $this->HasMany(DocumentInfomedUser::class);
     }
 
-    public function document_acknowledges(): HasManyThrough
+    public function document_reviews(): HasMany
     {
-        return $this->hasManyThrough(DocumentAcknowledge::class, DocumentFile::class);
+        return $this->HasMany(DocumentReview::class);
+    }
+
+    public function document_acknowledges(): HasMany
+    {
+        return $this->HasMany(DocumentAcknowledge::class);
     }
 }

@@ -11,6 +11,6 @@ class DocumentFileCreateData extends Data
         public string $file_name,
         public int $file_size,
         public string $file_ext,
-        public string $file_mime,
+        public string $file_type,
     ) {}
 }

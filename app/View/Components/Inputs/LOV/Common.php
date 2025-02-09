@@ -1,13 +1,12 @@
 <?php
 
-namespace App\View\Components\Inputs;
+namespace App\View\Components\Inputs\LOV;
 
 use Closure;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Vite;
 use Illuminate\View\Component;
 
-class Lov extends Component
+class Common extends Component
 {
     /**
      * Create a new component instance.
@@ -25,12 +24,8 @@ class Lov extends Component
         public ?string $searchButtonName = null,
         public ?bool $clearButtonShow = false,
         public ?string $clearButtonName = null,
-        public string $url,
         public ?string $modalSize = "modal-lg",
-        public ?string $dependencyElementName = null,
-        public ?string $hiddenElementColumnName = 'id',
-        public ?string $elementColumnName = 'name',
-        public ?string $columnNameForDescription = null,
+        public ?string $elementNameForDescription = null,
         public ?string $textHelper = null,
     ) {
         $this->placeholder = $placeholder ?? $label;
@@ -45,8 +40,6 @@ class Lov extends Component
      */
     public function render(): View|Closure|string
     {
-        $data['jsFile'] = Vite::asset('resources/js/general.js');
-
-        return view('components.inputs.lov')->with(compact('data'));
+        return view('components.inputs.lov.common');
     }
 }

@@ -4,7 +4,22 @@
         <nav class="navbar navbar-expand navbar-white shadow-sm">
             <!-- Left -->
             <ul class="navbar-nav">
-                <!-- buttons -->
+                @can('doc-create')
+                    <li class="nav-item mr-2">
+                        <a href="{{ route('documents.create') }}" class="btn btn-sm btn-outline-success" id="create" name="create">
+                            <i class="fas fa-plus d-inline"></i>
+                            <span class="ml-2 d-none d-sm-inline font-weight-bold">New</span>
+                        </a>
+                    </li>
+                @endcan
+                @can('doc-create')
+                    <li class="nav-item mr-2">
+                        <button href="{{ route('documents.create') }}" class="btn btn-sm btn-outline-info" id="createWithRef" name="createWithRef">
+                            <i class="fas fa-hand-pointer d-inline"></i>
+                            <span class="ml-2 d-none d-sm-inline font-weight-bold">New - With Ref Doc</span>
+                        </button>
+                    </li>
+                @endcan
             </ul>
 
             <!-- Right -->
@@ -36,9 +51,9 @@
                             <thead>
                                 <tr>
                                     <th>File</th>
-                                    <th>Owner</th>
                                     <th>Category</th>
                                     <th>Approval Doc. No.</th>
+                                    <th>Published By</th>
                                     <th>Published Date</th>
                                     <th>Reviewed</th>
                                     <th>Acknowledged</th>

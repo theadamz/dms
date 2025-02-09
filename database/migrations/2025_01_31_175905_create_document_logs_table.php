@@ -22,7 +22,7 @@ return new class extends Migration
             $table->unique(['document_id', 'user_id', 'created_at']);
 
             // FK
-            $table->foreign('document_id')->references('id')->on('documents')->restrictOnDelete()->cascadeOnUpdate();
+            $table->foreign('document_id')->references('id')->on('documents')->cascadeOnDelete()->cascadeOnUpdate();
         });
     }
 

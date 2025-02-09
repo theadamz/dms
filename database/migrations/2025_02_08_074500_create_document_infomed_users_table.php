@@ -11,16 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('document_reviews', function (Blueprint $table) {
+        Schema::create('document_infomed_users', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('document_id')->index();
             $table->uuid('user_id')->index();
-            $table->smallInteger('order');
-            $table->boolean('is_reviewed')->default(false);
-            $table->string('remarks')->nullable();
-            $table->uuid('created_by')->nullable();
-            $table->uuid('updated_by')->nullable();
-            $table->timestamps();
+            $table->uuid('created_by')->index();
+            $table->timestamp('created_at')->index();
 
             // constraints
             $table->unique(['document_id', 'user_id']);
@@ -36,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('document_reviews');
+        Schema::dropIfExists('document_infomed_users');
     }
 };

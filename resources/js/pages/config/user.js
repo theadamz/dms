@@ -405,7 +405,7 @@ function formInputClear() {
     $('#formInput')[0].reset();
     $('#department option[value=""]').prop('selected', true).change();
     $('#role option[value=""]').prop('selected', true).change();
-    $('#timezone option[value=""]').prop('selected', true).change();
+    $('#timezone option[value="' + timezone + '"]').prop('selected', true).change();
     $('#is_active').prop('checked', true);
     // clear picture
     $('#picturePreview').attr('src', '');

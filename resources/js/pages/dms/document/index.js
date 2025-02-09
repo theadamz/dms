@@ -52,10 +52,6 @@ function initDataTable() {
                 },
             },
             {
-                "data": "owner_name",
-                "name": "u.name",
-            },
-            {
                 "data": "category_name",
                 "orderable": false,
                 "searchable": false,
@@ -69,6 +65,13 @@ function initDataTable() {
             {
                 "data": "doc_no",
                 "name": "d.doc_no",
+                "render": function (data, type, row, meta) {
+                    return `<a href="${_baseURL}/documents/${row.id}">${data}</a>`;
+                }
+            },
+            {
+                "data": "owner_name",
+                "name": "u.name",
             },
             {
                 "data": "publish_at",

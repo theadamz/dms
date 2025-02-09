@@ -20,6 +20,14 @@
                         </button>
                     </li>
                 @endcan
+                @can('doc-cancel')
+                    <li class="nav-item mr-2">
+                        <button type="button" class="btn btn-sm btn-outline-danger" id="cancel" name="cancel">
+                            <i class="fas fa-times d-inline"></i>
+                            <span class="ml-2 d-none d-sm-inline font-weight-bold">Cancel</span>
+                        </button>
+                    </li>
+                @endcan
             </ul>
 
             <!-- Right -->

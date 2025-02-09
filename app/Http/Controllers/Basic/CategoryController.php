@@ -15,7 +15,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Vite;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\File;
 use Illuminate\View\View;
@@ -366,7 +365,7 @@ class CategoryController extends Controller
         ];
         $data['columnDefinitions'] = [];
         $data['columnOrders'] = [];
-        $data['jsFile'] = Vite::asset('resources/js/pages/lov/common.js');
+        $data['jsFile'] = 'resources/js/pages/lov/common.js';
 
         return view('lov.common')->with(compact('data'));
     }

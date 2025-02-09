@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\File;
 
-class DocumentCreateRequest extends FormRequest
+class DocumentUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,6 +26,7 @@ class DocumentCreateRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'id' => ['required', 'uuid', Rule::exists('documents', 'id')],
             'use_due_date' => ['required', 'boolean'],
             'due_date' => [Rule::RequiredIf(fn() => $this->input('use_due_date')), 'date'],
             'category' => ['required', 'uuid', Rule::exists('categories', 'id')],
@@ -34,18 +35,24 @@ class DocumentCreateRequest extends FormRequest
             'is_locked' => ['required', 'boolean'],
             'notes' => ['nullable', 'string'],
             'is_public' => ['required', 'boolean'],
-            "files" => ["required"],
-            "files.*" => ["required", File::types(array_merge(config('setting.other.file_doc_attachment_allowed'), config('setting.other.file_img_allowed')))->max(config('setting.other.max_file_size'))],
+            "files" => ["nullable"],
+            "files.*" => ["nullable", File::types(array_merge(config('setting.other.file_doc_attachment_allowed'), config('setting.other.file_img_allowed')))->max(config('setting.other.max_file_size'))],
+            "document_files" => ["nullable", "array"],
+            "document_files.*.id" => ['nullable', 'uuid', Rule::exists('document_files', 'id')],
+            "document_files.*.file_name" => ['nullable', 'string', Rule::exists('document_files', 'file_name')->where('document_id', $this->input('id'))],
+            "document_files.*.file_origin_name" => ["nullable", "string"],
+            "document_files.*.file_size" => ["nullable", "integer"],
+            "document_files.*.file_type" => ["nullable", "string"],
             'approval_workflow_type' => ['required',  Rule::in(WorkflowType::cases())],
             "approval_users" => ["required", "array"],
             "approval_users.*.id" => ["required", "uuid", Rule::exists('users', 'id')],
             "approval_users.*.name" => ["required", "string"],
             "approval_users.*.email" => ["required", "email"],
             "approval_users.*.order" => ["required", "integer"],
-            "informed_users" => ["nullable", "array"],
             "informed_users.*.id" => ["nullable", "uuid", Rule::exists('users', 'id')],
             "informed_users.*.name" => ["nullable", "string"],
             "informed_users.*.email" => ["nullable", "email"],
+            'is_review_required' => ['required', 'boolean'],
             'is_review_required' => ['required', 'boolean'],
             'review_workflow_type' => [Rule::RequiredIf(fn() => $this->input('is_review_required')), Rule::in(WorkflowType::cases())],
             "review_users" => [Rule::RequiredIf(fn() => $this->input('is_review_required')), "array"],
@@ -66,10 +73,12 @@ class DocumentCreateRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
+            'id' => $this->route('id'),
             'use_due_date' => $this->has('use_due_date') ? true : false,
             'ref_doc_id' => $this->has('ref_doc_id') && $this->post('ref_doc_id') === 'null' ? null : $this->post('ref_doc_id'),
             'is_locked' => $this->has('is_locked') ? filter_var($this->post('is_locked'), FILTER_VALIDATE_BOOLEAN) : false,
             'is_public' => $this->has('is_public') ? filter_var($this->post('is_public'), FILTER_VALIDATE_BOOLEAN) : false,
+            'document_files' => str($this->post('document_files'))->isJson() ? json_decode($this->post('document_files'), true) : null,
             'approval_users' => str($this->post('approval_users'))->isJson() ? json_decode($this->post('approval_users'), true) : null,
             'informed_users' => str($this->post('informed_users'))->isJson() ? json_decode($this->post('informed_users'), true) : null,
             'is_review_required' => $this->has('is_review_required') ? filter_var($this->post('is_review_required'), FILTER_VALIDATE_BOOLEAN) : false,

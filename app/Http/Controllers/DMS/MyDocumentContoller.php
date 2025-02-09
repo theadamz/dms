@@ -7,6 +7,7 @@ use App\Enums\WorkflowType;
 use App\Helpers\GeneralHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DMS\DocumentCreateRequest;
+use App\Http\Requests\DMS\DocumentUpdateRequest;
 use App\Models\Basic\Category;
 use App\Models\DMS\Document;
 use App\Services\DocumentService;
@@ -121,7 +122,7 @@ class MyDocumentContoller extends Controller
             })->rawColumns(['status'])->toJson();
     }
 
-    public function create(): View
+    public function create(?string $refDocId = null): View
     {
         // vendor js
         GeneralHelper::addAdditionalVendorJS([
@@ -150,7 +151,7 @@ class MyDocumentContoller extends Controller
 
         $data = $this->service->store(
             docDate: now(Session::get('timezone')),
-            dueDate: !empty($validated['due_date']) ? Date::parse($validated['due_date']) : null,
+            dueDate: $validated['use_due_date'] ? Date::parse($validated['due_date']) : null,
             categorySubId: $validated['category_sub'],
             ownerId: Auth::id(),
             departmentId: Auth::user()->department_id,
@@ -158,6 +159,7 @@ class MyDocumentContoller extends Controller
             notes: $validated['notes'],
             approvalWorkflowType: WorkflowType::tryFrom($validated['approval_workflow_type']),
             approvalUsers: $validated['approval_users'],
+            informedUsers: $validated['informed_users'],
             reviewWorkflowType: WorkflowType::tryFrom($validated['review_workflow_type']),
             isReviewRequired: $validated['is_review_required'],
             reviewUsers: $validated['review_users'],
@@ -209,8 +211,34 @@ class MyDocumentContoller extends Controller
         return view('dms.my-document.edit')->with(compact('workflowTypes', 'categories', 'data'));
     }
 
-    public function update(string $id)
+    public function update(DocumentUpdateRequest $request): JsonResponse
     {
-        dd($id);
+        // validated request
+        $validated = $request->validated();
+
+        $data = $this->service->update(
+            id: $validated['id'],
+            dueDate: $validated['use_due_date'] ? Date::parse($validated['due_date']) : null,
+            categorySubId: $validated['category_sub'],
+            ownerId: Auth::id(),
+            departmentId: Auth::user()->department_id,
+            refDocId: $validated['ref_doc_id'],
+            notes: $validated['notes'],
+            approvalWorkflowType: WorkflowType::tryFrom($validated['approval_workflow_type']),
+            approvalUsers: $validated['approval_users'],
+            informedUsers: $validated['informed_users'] ?? null,
+            reviewWorkflowType: WorkflowType::tryFrom($validated['review_workflow_type']),
+            isReviewRequired: $validated['is_review_required'],
+            reviewUsers: $validated['review_users'],
+            acknowledgementWorkflowType: WorkflowType::tryFrom($validated['acknowledgement_workflow_type']),
+            isAcknowledgementRequired: $validated['is_acknowledgement_required'],
+            acknowledgementUsers: $validated['acknowledgement_users'],
+            isLocked: $validated['is_locked'],
+            isPublic: $validated['is_public'],
+            files: $validated['files'] ?? null,
+            documentFiles: $validated['document_files'] ?? null,
+        );
+
+        return response()->json(['message' => "Document {$data->doc_no} successfully saved."])->setStatusCode(Response::HTTP_OK);
     }
 }

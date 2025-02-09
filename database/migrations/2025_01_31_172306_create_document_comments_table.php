@@ -27,7 +27,7 @@ return new class extends Migration
             $table->unique(['document_id', 'document_file_id', 'user_id']);
 
             // FK
-            $table->foreign('document_id')->references('id')->on('documents')->restrictOnDelete()->cascadeOnUpdate();
+            $table->foreign('document_id')->references('id')->on('documents')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreign('document_file_id')->references('id')->on('document_files')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreign('user_id')->references('id')->on('users')->restrictOnDelete()->cascadeOnUpdate();
         });

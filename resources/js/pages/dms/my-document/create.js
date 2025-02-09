@@ -26,6 +26,7 @@ let refDocId = null;
 let workFlowSectionSelected = 'approval';
 let documentFiles = [];
 let approvalUsers = [];
+let informedUsers = [];
 let isReviewRequired = false;
 let reviewUsers = [];
 let isAcknowledgementRequired = false;
@@ -115,9 +116,9 @@ function initOtherElements() {
 
     // document files -- events
     document.getElementById('addFiles').addEventListener('click', function () {
-        $('#files').click();
+        $('#attachments').click();
     });
-    document.getElementById('files').addEventListener('change', function (e) {
+    document.getElementById('attachments').addEventListener('change', function (e) {
         documentFilesNew(this.files);
     });
     document.getElementById('clear').addEventListener('click', formInputClear);
@@ -140,7 +141,6 @@ function initOtherElements() {
     $('#approvalWorkflowContainer').sortable({
         handle: '.approval-workflow-user-handle-order',
         invertSwap: true,
-        group: 'list',
         animation: 200,
         ghostClass: 'ghost',
         onSort: approvalWorkflowRender,
@@ -162,6 +162,7 @@ function initOtherElements() {
         $('#reviewWorkflowCard').addClass('d-none');
         $('#addReviewWorkFlow').removeClass('d-none');
         reviewUsers = [];
+        reviewWorkflowRender();
     });
     document.getElementById('addReviewUsers').addEventListener('click', function () {
         workFlowSectionSelected = 'review'; // set section selected
@@ -174,7 +175,6 @@ function initOtherElements() {
     $('#reviewWorkflowContainer').sortable({
         handle: '.review-workflow-user-handle-order',
         invertSwap: true,
-        group: 'list',
         animation: 200,
         ghostClass: 'ghost',
         onSort: reviewWorkflowRender,
@@ -195,7 +195,8 @@ function initOtherElements() {
         isAcknowledgementRequired = false;
         $('#acknowledgementWorkflowCard').addClass('d-none');
         $('#addAcknowledgementWorkFlow').removeClass('d-none');
-        reviewUsers = [];
+        acknowledgementUsers = [];
+        acknowledgementWorkflowRender();
     });
     document.getElementById('addAcknowledgementUsers').addEventListener('click', function () {
         workFlowSectionSelected = 'acknowledgement'; // set section selected
@@ -208,11 +209,17 @@ function initOtherElements() {
     $('#acknowledgementWorkflowContainer').sortable({
         handle: '.acknowledgement-workflow-user-handle-order',
         invertSwap: true,
-        group: 'list',
         animation: 200,
         ghostClass: 'ghost',
         onSort: acknowledgementWorkflowRender,
     });
+
+    // informed users -- events
+    document.getElementById('addInformedUsers').addEventListener('click', function () {
+        workFlowSectionSelected = 'informed'; // set section selected
+        $('#modalFormWorkflowUser').modal('show'); // show modal
+    });
+
 }
 
 function initMaxLengthForm() {
@@ -222,6 +229,7 @@ function initMaxLengthForm() {
 function initActions() {
     documentFilesRender();
     approvalWorkflowRender();
+    informedUsersRender();
     reviewWorkflowRender();
     acknowledgementWorkflowRender();
 }
@@ -265,6 +273,7 @@ async function saveData() {
     _data2Send.append('ref_doc_id', refDocId);
     _data2Send.append("due_date", dateFormat($('#due_date').datetimepicker('viewDate'), 'YYYY-MM-DD'));
     _data2Send.append('approval_users', JSON.stringify(approvalUsers));
+    _data2Send.append('informed_users', JSON.stringify(informedUsers));
     _data2Send.append('is_review_required', isReviewRequired);
     _data2Send.append('review_users', JSON.stringify(reviewUsers));
     _data2Send.append('is_acknowledgement_required', isAcknowledgementRequired);
@@ -274,10 +283,10 @@ async function saveData() {
     });
 
     // send request
-    const response = await axiosCustom($('#formInput').attr('action'), "POST", _data2Send, null);
+    const response = await axiosCustom($('#formInput').attr('action'), $('#formInput').attr('method'), _data2Send, null);
 
     // if response status not 201 or 200
-    if (![201, 200].includes(response.status)) {
+    if (![201].includes(response.status)) {
         // show error
         MsgBox.HtmlNotification(refactorErrorMessages(response.data), `${response.status} - ${response.statusText}`)
         formValidationSetErrorMessages(response.data.errors);
@@ -312,10 +321,10 @@ function documentFilesNew(files) {
 
     for (const file of files) {
         // check for duplicate
-        if (documentFiles.find(d => d.file_name === file.name)) return;
+        if (documentFiles.find(d => d.file_origin_name === file.name)) return;
 
         documentFiles.push({
-            file_name: file.name,
+            file_origin_name: file.name,
             file_size: file.size,
             file_type: file.type,
             file_uri: file
@@ -323,7 +332,7 @@ function documentFilesNew(files) {
     }
 
     // clear file
-    $('#files').val('');
+    $('#attachments').val('');
 
     documentFilesRender();
 }
@@ -352,11 +361,11 @@ function documentFilesRender() {
 function documentFilesRemove() {
     const fileName = $(this).data('name');
 
-    const data = documentFiles.find(item => item.file_name == fileName);
+    const data = documentFiles.find(item => item.file_origin_name == fileName);
     if (!data) return;
 
     // filter data to remove
-    documentFiles = documentFiles.filter(item => item.file_name != fileName);
+    documentFiles = documentFiles.filter(item => item.file_origin_name != fileName);
 
     documentFilesRender();
 }
@@ -377,6 +386,10 @@ function workflowAddUsers(selectedUsers) {
 
         case "acknowledgement":
             acknowledgementWorkflowAdd(selectedUsers);
+            break;
+
+        case "informed":
+            informedUsersAdd(selectedUsers);
             break;
 
     }
@@ -400,6 +413,78 @@ function workflowAddUsersSet(approvalSet) {
 }
 
 // ./ workflow users / approval set ===============
+
+// informed users ===============
+
+function informedUsersAdd(selectedUsers) {
+    if (!selectedUsers) return;
+
+    showProgressButton(true, '#workflowUsersAdd');
+    showBlockUIElement('#formWorkflowUser');
+
+    selectedUsers.forEach(user => {
+        // check if user already exist
+        if (informedUsers.find(u => u.id === user.id)) return;
+
+        // add user
+        informedUsers.push({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+        })
+    });
+
+    showProgressButton(false, '#workflowUsersAdd');
+    showBlockUIElement('#formWorkflowUser', false);
+
+    $('#modalFormWorkflowUser').modal('hide');
+    informedUsersRender();
+}
+
+function informedUsersRender() {
+    // clear events
+    $('.informed-users-remove').off('click');
+
+    if (informedUsers.length <= 0) {
+        $('#informedUsersContainer').html(`<div class="d-flex flex-grow-1 justify-content-center align-items-center">No workflow found</div>`);
+        return;
+    }
+
+    let html = '';
+    informedUsers.forEach((user, index) => {
+        html += `<div class="list-group-item list-group-item-action" data-id="${user.id}">
+                    <div class="d-flex align-items-center">
+                        <div class="d-flex flex-grow-1 justify-content-between">
+                            <div class="d-flex flex-column">
+                                <span class="font-weight-bold mb-1">${user.name}</span>
+                                <span class="mb-1">${user.email}</span>
+                            </div>
+                            <button type="button" class="btn btn-sm text-danger informed-users-remove" data-id="${user.id}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+    });
+
+    $('#informedUsersContainer').html(html);
+
+    // init events
+    $('.informed-users-remove').on('click', informedUsersRemove);
+}
+
+function informedUsersRemove() {
+    const id = $(this).data('id');
+    const data = informedUsers.find(item => item.id == id);
+    if (!data) return;
+
+    // filter data to remove
+    informedUsers = informedUsers.filter(item => item.id != id);
+
+    informedUsersRender();
+}
+
+// ./ informed users ===============
 
 // acknowledgement workflow ===============
 
@@ -434,7 +519,7 @@ function acknowledgementWorkflowRender() {
     $('.acknowledgement-workflow-user-remove').off('click');
 
     if (acknowledgementUsers.length <= 0) {
-        $('#reviewWorkflowContainer').html(`<div class="d-flex flex-grow-1 justify-content-center align-items-center">No workflow found</div>`);
+        $('#acknowledgementWorkflowContainer').html(`<div class="d-flex flex-grow-1 justify-content-center align-items-center">No workflow found</div>`);
         return;
     }
 

@@ -6,6 +6,8 @@ use App\Data\DMS\DocumentApprovalUserData;
 use App\Data\DMS\DocumentCreateData;
 use App\Data\DMS\DocumentData;
 use App\Data\DMS\DocumentFileCreateData;
+use App\Data\DMS\DocumentInformedUserData;
+use App\Data\DMS\DocumentUpdateData;
 use App\Data\DMS\DocumentViewData;
 use App\Enums\DocumentStatus;
 use App\Enums\WorkflowType;
@@ -14,6 +16,7 @@ use App\Models\DMS\Document;
 use App\Models\DMS\DocumentAcknowledge;
 use App\Models\DMS\DocumentApproval;
 use App\Models\DMS\DocumentFile;
+use App\Models\DMS\DocumentInfomedUser;
 use App\Models\DMS\DocumentReview;
 use App\Models\DMS\DocumentSequence;
 use App\Repositories\Contracts\DocumentRepository;
@@ -81,7 +84,7 @@ class DocumentService
                 'file_name' => $file->hashName(),
                 'file_size' => $file->getSize(),
                 'file_ext' => $file->extension(),
-                'file_mime' => $file->getClientMimeType(),
+                'file_type' => $file->getClientMimeType(),
             ]);
         }
 
@@ -99,17 +102,17 @@ class DocumentService
         // check if document is for public
         if ($doc->is_public) return true;
 
-        // get file ids
-        $fileIds = DocumentFile::where("document_id", $documentId)->pluck('id');
+        // check if user_id has to approve document
+        if (DocumentApproval::where('user_id', $userId)->whereIn('document_id', $documentId)->exists()) return true;
 
-        // check if user_id has to approve document files
-        if (DocumentApproval::where('user_id', $userId)->whereIn('document_file_id', $fileIds)->exists()) return true;
+        // check if user_id has review document
+        if (DocumentReview::where('user_id', $userId)->whereIn('document_id', $documentId)->exists()) return true;
 
-        // check if user_id has review document files
-        if (DocumentReview::where('user_id', $userId)->whereIn('document_file_id', $fileIds)->exists()) return true;
+        // check if user_id has acknowledge document
+        if (DocumentAcknowledge::where('user_id', $userId)->whereIn('document_id', $documentId)->exists()) return true;
 
-        // check if user_id has acknowledge document files
-        if (DocumentAcknowledge::where('user_id', $userId)->whereIn('document_file_id', $fileIds)->exists()) return true;
+        // check if user_id has acknowledge document
+        if (DocumentInfomedUser::where('user_id', $userId)->whereIn('document_id', $documentId)->exists()) return true;
 
         return false;
     }
@@ -124,6 +127,7 @@ class DocumentService
         ?string $notes = null,
         WorkflowType $approvalWorkflowType,
         array $approvalUsers,
+        ?array $informedUsers = null,
         bool $isReviewRequired,
         WorkflowType $reviewWorkflowType,
         ?array $reviewUsers = null,
@@ -166,6 +170,9 @@ class DocumentService
             // prepare approval users
             $approvalUsers = DocumentApprovalUserData::collect(collect($approvalUsers));
 
+            // prepare informed users
+            $informedUsers = !empty($informedUsers) ? DocumentInformedUserData::collect(collect($informedUsers)) : null;
+
             // prepare review users
             $reviewUsers = !empty($reviewUsers) ? DocumentApprovalUserData::collect(collect($reviewUsers)) : null;
 
@@ -173,7 +180,7 @@ class DocumentService
             $acknowledgementUsers = !empty($acknowledgementUsers) ? DocumentApprovalUserData::collect(collect($acknowledgementUsers)) : null;
 
             // create
-            $document = $this->repository->store(data: $data, files: $files, approvalUsers: $approvalUsers, reviewUsers: $reviewUsers, acknowledgementUsers: $acknowledgementUsers);
+            $document = $this->repository->store(data: $data, files: $files, approvalUsers: $approvalUsers, informedUsers: $informedUsers, reviewUsers: $reviewUsers, acknowledgementUsers: $acknowledgementUsers);
 
             DB::commit();
 
@@ -212,5 +219,115 @@ class DocumentService
         }
 
         return $this->repository->view(id: $id);
+    }
+
+    public function update(
+        string $id,
+        ?DateTime $dueDate = null,
+        string $ownerId,
+        string $categorySubId,
+        string $departmentId,
+        ?string $refDocId = null,
+        ?string $notes = null,
+        WorkflowType $approvalWorkflowType,
+        array $approvalUsers,
+        ?array $informedUsers = null,
+        bool $isReviewRequired,
+        WorkflowType $reviewWorkflowType,
+        ?array $reviewUsers = null,
+        bool $isAcknowledgementRequired,
+        WorkflowType $acknowledgementWorkflowType,
+        ?array $acknowledgementUsers = null,
+        bool $isLocked,
+        bool $isPublic,
+        ?array $files = null,
+        ?array $documentFiles = null,
+    ): DocumentData {
+        try {
+            // get previous file names
+            $fileNames = DocumentFile::where('document_id', $id)->pluck('file_name');
+
+            // get only file_name from $documentFiles
+            $documentFileNames = collect($documentFiles)->pluck('file_name');
+
+            // get file name that not in the $documentFiles
+            $filesToDelete = $fileNames->filter(function ($file) use ($documentFileNames) {
+                return !$documentFileNames->contains($file);
+            });
+            // dd($fileNames, $documentFileNames, $filesToDelete);
+
+            // handle files
+            if (!empty($files)) {
+                $files = $this->handleFiles($files);
+            }
+
+            DB::beginTransaction();
+
+            // prepare data
+            $data = new DocumentUpdateData(
+                due_date: $dueDate,
+                owner_id: $ownerId,
+                category_sub_id: $categorySubId,
+                department_id: $departmentId,
+                ref_doc_id: $refDocId,
+                notes: $notes,
+                approval_workflow_type: $approvalWorkflowType,
+                review_workflow_type: $reviewWorkflowType,
+                is_review_required: $isReviewRequired,
+                acknowledgement_workflow_type: $acknowledgementWorkflowType,
+                is_acknowledgement_required: $isAcknowledgementRequired,
+                is_locked: $isLocked,
+                is_public: $isPublic,
+            );
+
+            // prepare files
+            $files = !empty($files) ? DocumentFileCreateData::collect($files) : collect([]);
+
+            // prepare approval users
+            $approvalUsers = !empty($approvalUsers) ? DocumentApprovalUserData::collect(collect($approvalUsers)) : collect([]);
+
+            // prepare informed users
+            $informedUsers = !empty($informedUsers) ? DocumentInformedUserData::collect(collect($informedUsers)) : collect([]);
+
+            // prepare review users
+            $reviewUsers = !empty($reviewUsers) ? DocumentApprovalUserData::collect(collect($reviewUsers)) : collect([]);
+
+            // prepare acknowledgement users
+            $acknowledgementUsers = !empty($acknowledgementUsers) ? DocumentApprovalUserData::collect(collect($acknowledgementUsers)) : collect([]);
+
+            // create
+            $document = $this->repository->update(id: $id, data: $data, files: $files, filesToDelete: $filesToDelete, approvalUsers: $approvalUsers, informedUsers: $informedUsers, reviewUsers: $reviewUsers, acknowledgementUsers: $acknowledgementUsers);
+
+            DB::commit();
+
+            // delete files if not empty
+            if ($filesToDelete->isNotEmpty()) {
+                foreach ($filesToDelete as $file) {
+                    Storage::delete(config('setting.other.path_to_upload') . '/' . $file);
+                }
+            }
+
+            return $document;
+        } catch (\Exception $e) {
+            // rollback
+            DB::rollBack();
+
+            dd($files);
+
+            // if $attachmentFiles not empty
+            if (!empty($files)) {
+                foreach ($files->toArray() as $file) {
+                    Storage::delete(config('setting.other.path_to_upload') . '/' . $file['file_name']);
+                }
+            }
+
+            // Custom exception
+            if ($e instanceof CustomException) throw new HttpResponseException($e->getResponse());
+
+            // other exception
+            throw new HttpResponseException(response([
+                "message" => $e->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR));
+        }
     }
 }

@@ -4,6 +4,13 @@
         <nav class="navbar navbar-expand navbar-white shadow-sm">
             <!-- Left -->
             <ul class="navbar-nav">
+                <li class="nav-item mr-2">
+                    <a href="{{ route('documents.list') }}" class="btn btn-sm btn-outline-dark">
+                        <i class="fas fa-arrow-left d-inline"></i>
+                        <span class="ml-2 d-none d-sm-inline font-weight-bold">Back</span>
+                    </a>
+                </li>
+                <div class="border-left text-center mx-2">&nbsp;</div>
                 @if ($data->status->isEditable())
                     @can('doc-edit')
                         <li class="nav-item mr-2">

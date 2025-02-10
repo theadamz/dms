@@ -47,7 +47,7 @@ class DocumentController extends Controller
                         d.is_review_required, d.is_reviewed, d.is_acknowledgement_required, d.is_acknowledged,
                         c.name AS category_name, cs.name AS category_sub_name, u.name AS owner_name")
             ->where("d.is_public", true)->where("d.is_locked", false)
-            // ->where("d.status", DocumentStatus::APPROVED)
+            ->where("d.status", DocumentStatus::APPROVED)
             ->when($request->filled('category'), function ($query) use ($request) {
                 return $query->where('cs.category_id', $request->get('category'));
             })
@@ -74,6 +74,17 @@ class DocumentController extends Controller
         // remove breadcrumb
         GeneralHelper::removeBreadCrumb(['List']);
 
+        // set id
+        GeneralHelper::setId($data->id);
+
         return view('dms.document.view')->with(compact('data'));
+    }
+
+    public function previewFile(string $id, string $documentFileId): View
+    {
+        // get url file
+        $urlFile = $this->service->getDocumentAccessFile(documentId: $id, documentFileId: $documentFileId, userId: Auth::id());
+
+        return view('dms.document.preview-file')->with(compact('urlFile'));
     }
 }

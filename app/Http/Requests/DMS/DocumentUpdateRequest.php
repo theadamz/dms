@@ -36,7 +36,7 @@ class DocumentUpdateRequest extends FormRequest
             'notes' => ['nullable', 'string'],
             'is_public' => ['required', 'boolean'],
             "files" => ["nullable"],
-            "files.*" => ["nullable", File::types(array_merge(config('setting.other.file_doc_attachment_allowed'), config('setting.other.file_img_allowed')))->max(config('setting.other.max_file_size'))],
+            "files.*" => ["required", File::types(config('setting.other.file_doc_allowed'))->max(config('setting.other.max_file_size'))],
             "document_files" => ["nullable", "array"],
             "document_files.*.id" => ['nullable', 'uuid', Rule::exists('document_files', 'id')],
             "document_files.*.file_name" => ['nullable', 'string', Rule::exists('document_files', 'file_name')->where('document_id', $this->input('id'))],

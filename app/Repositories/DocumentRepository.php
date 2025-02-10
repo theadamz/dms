@@ -266,14 +266,13 @@ class DocumentRepository implements Contract
         // if approval users not empty
         if ($informedUsers->isNotEmpty()) {
             // remove users
-            DocumentInfomedUser::whereIn('document_id', $document->id)->delete();
+            DocumentInfomedUser::where('document_id', $document->id)->delete();
 
             foreach ($informedUsers as $user) {
                 // create data
                 DocumentInfomedUser::create([
                     'document_id' => $document->id,
                     'user_id' => $user->id,
-                    'order' => $user->order,
                 ]);
             } // ./ approval users
         }

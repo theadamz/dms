@@ -44,6 +44,7 @@ return [
         'max_file_size' => 25600,
         'file_doc_attachment_allowed' => ['pdf', 'doc', 'docx', 'xlsx', 'ppt', 'pptx', 'rtf', 'csv', 'txt'],
         'file_img_allowed' => ['png', 'jpg', 'jpeg', 'bmp'],
+        'file_doc_allowed' => ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'png', 'jpg', 'jpeg'],
         'path_to_upload' => 'contents',
         'path_to_template' => 'templates',
         'path_to_temp' => 'contents/temp',

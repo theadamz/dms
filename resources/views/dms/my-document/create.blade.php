@@ -141,7 +141,7 @@
                                             <div class="row">
                                                 <div class="col-md-12">
                                                     <button type="button" class="btn btn-primary btn-sm" id="addFiles" name="addFiles">Add Files</button>
-                                                    <input type="file" id="attachments" name="attachments" class="d-none ignore" multiple accept="{{ '.' . join(', .', array_merge(config('setting.other.file_doc_attachment_allowed'), config('setting.other.file_img_allowed'))) }}" />
+                                                    <input type="file" id="attachments" name="attachments" class="d-none ignore" multiple accept="{{ '.' . join(', .', config('setting.other.file_doc_allowed')) }}" />
                                                 </div>
                                                 <div class="col-md-12 border-top my-3"></div>
                                                 <div class="col-md-12" id="documentFilesContainer">

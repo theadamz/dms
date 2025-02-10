@@ -94,10 +94,13 @@ class DocumentService
     private function isUserAuthorizeView(string $documentId, string $userId): bool
     {
         // get data is_public and owner_id
-        $doc = Document::where('id', $documentId)->first(['owner_id', 'is_public']);
+        $doc = Document::where('id', $documentId)->first(['owner_id', 'is_locked', 'is_public']);
 
         // if $userId is the owner
         if ($doc->owner_id === $userId) return true;
+
+        // check if document currently locked
+        if ($doc->is_public) return false;
 
         // check if document is for public
         if ($doc->is_public) return true;
@@ -312,8 +315,6 @@ class DocumentService
             // rollback
             DB::rollBack();
 
-            dd($files);
-
             // if $attachmentFiles not empty
             if (!empty($files)) {
                 foreach ($files->toArray() as $file) {
@@ -329,5 +330,29 @@ class DocumentService
                 "message" => $e->getMessage(),
             ], Response::HTTP_INTERNAL_SERVER_ERROR));
         }
+    }
+
+    public function getDocumentAccessFile(string $documentId, string $documentFileId, string $userId): ?string
+    {
+        // check if user is authorize
+        if (!$this->isUserAuthorizeView($documentId, $userId)) {
+            return null;
+        }
+
+        // check if document file exist
+        if (!DocumentFile::where('id', $documentFileId)->exists()) {
+            return null;
+        }
+
+        // get data
+        $documentFile = DocumentFile::where('id', $documentFileId)->first();
+
+        // link expire time
+        $linkDuration = now()->addSeconds(10);
+
+        // create temporary url
+        $url = Storage::disk('local')->temporaryUrl(config('setting.other.path_to_upload') . '/' . $documentFile->file_name, $linkDuration);
+
+        return $url;
     }
 }

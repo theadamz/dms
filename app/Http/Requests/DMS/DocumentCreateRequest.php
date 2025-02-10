@@ -35,7 +35,7 @@ class DocumentCreateRequest extends FormRequest
             'notes' => ['nullable', 'string'],
             'is_public' => ['required', 'boolean'],
             "files" => ["required"],
-            "files.*" => ["required", File::types(array_merge(config('setting.other.file_doc_attachment_allowed'), config('setting.other.file_img_allowed')))->max(config('setting.other.max_file_size'))],
+            "files.*" => ["required", File::types(config('setting.other.file_doc_allowed'))->max(config('setting.other.max_file_size'))],
             'approval_workflow_type' => ['required',  Rule::in(WorkflowType::cases())],
             "approval_users" => ["required", "array"],
             "approval_users.*.id" => ["required", "uuid", Rule::exists('users', 'id')],

@@ -1,24 +1,37 @@
 import {
-    elementIsInPage
-} from '../../../general';
-
+    loadingProcess
+} from "../../../general";
 
 function initOtherElements() {
     //
 }
 
 function initActions() {
-    if (elementIsInPage(document.querySelector('#edit'))) {
-        document.querySelector('#edit').addEventListener('click', () => {
-            const data = _dataTable.row({
-                selected: true
-            }).data();
-            if (typeof data === "undefined") return;
-            editData(_dataTable.row({
-                selected: true
-            }).data().id.trim());
-        });
-    }
+    // file card events
+    $('.file-card-info').off('click');
+    $('.file-card-info').on('click', previewFile);
+
+    document.getElementById('refresh').addEventListener('click', function () {
+        loadingProcess();
+        window.location.reload();
+    })
+}
+
+function previewFile(e) {
+    const id = $(this).data('id');
+
+    // show loading
+    $('.loading-preview-file').removeClass('d-none');
+    $('#filePreviewContainer').addClass('d-none');
+
+    // load content
+    $('#filePreview').load(`${_baseURL}/documents/${_id}/files/${id}/preview`, () => {
+
+        // hide loading
+        $('.loading-preview-file').addClass('d-none');
+        $('#filePreviewContainer').removeClass('d-none');
+
+    });
 }
 
 document.addEventListener("DOMContentLoaded", function () {
